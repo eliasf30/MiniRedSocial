@@ -1,0 +1,62 @@
+import { NavLink } from "react-router";
+
+function Principal() {
+  return (
+    <>
+      <div className="d-flex justify-content-center align-items-center  ">
+        <div className="card text-center "      style={{
+      width: "50vw",
+      maxWidth: "1200px",
+      minHeight: "400px",
+      padding: "2rem",
+     
+      boxShadow: "0 4px 12px rgba(0,0,0,0.1)"
+    }}
+>
+          <div className="card-body">
+            <h2
+              className="card-title mb-4 fw-bold"
+              style={{ color: "#435f7a" }}
+            >
+              {" "}
+              Bienvenido a Mini Red Social  <i class="bi bi-chat-left-text"></i>
+            </h2>
+            <p
+              className="card-text "
+              style={{
+                fontSize: "1.2rem",
+                lineHeight: "1.5",
+                borderBottom: "2px solid #dee2e6",
+                paddingBottom: "8px",
+                marginBottom:"100px"
+              }}
+            >
+              Conectate con otras personas, comparti tu perfil y chatea en
+              tiempo real. 
+            </p>
+
+            <p className="card-text text-muted m" >
+              Registrate o inicia sesion para empezar
+            </p>
+            <div className="container d-flex justify-content-evenly mt-5 ">
+              <NavLink to="/Login"
+                className="btn btn-primary submitbutton"
+                
+              >
+                Iniciar sesion
+              </NavLink>
+              <NavLink to="/Register"
+                className="btn btn-secondary submitbutton"
+                
+              >
+                Registrarse
+              </NavLink>
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
+
+export default Principal;

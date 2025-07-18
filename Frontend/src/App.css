@@ -1,0 +1,51 @@
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.formDiv {
+  width: 100%;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+}
+.submitbutton{
+  padding: 10px 24px !important; 
+  min-width: 130px;
+  border-radius: 8px;
+}
+.previewImage{
+  width: 140px;
+  height: 140px;
+  
+  object-fit: cover;
+ border-radius: 50%;
+  border: 2px solid #ccc;
+  margin-bottom: 10px;
+  flex-shrink: 0;
+}
+
+.descripcion-container {
+  position: relative;
+}
+
+.descripcion-textarea {
+  min-height: 130px;
+  resize: none;
+  padding-bottom: 2rem; /* para que no se solape el contador */
+}
+
+.contador-caracteres {
+  position: absolute;
+  bottom: 5px;
+  right: 12px;
+  font-size: 0.85rem;
+  color: #6c757d;
+  margin: 0;
+}
+
+.error-text {
+  font-size: 0.85rem;
+  color: red;
+  margin-top: 4px;
+  margin-bottom: 1px;
+}
