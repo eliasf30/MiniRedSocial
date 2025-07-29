@@ -2,7 +2,9 @@
 function Descripcion(){
     return(
         <>
-        <h1> esta es la descripcion</h1>
+        <div className="contenedor-principal">
+        <h4> esta es la descripcion</h4>
+        </div>
         </>
     )
 }

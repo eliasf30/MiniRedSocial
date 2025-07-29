@@ -1,6 +1,22 @@
-import { NavLink } from "react-router";
+import { NavLink, useNavigate } from "react-router";
+import { useAuth } from "../context/useAuth";
+import { useEffect } from "react";
 
 function Principal() {
+
+  const {usuario} = useAuth()
+  const navigate = useNavigate()
+
+   useEffect(() =>{
+            if(usuario){
+            navigate("/home")
+        }
+        },[usuario,navigate])
+    
+        if (usuario) {
+        return null; 
+        }
+
   return (
     <>
       <div className="d-flex justify-content-center align-items-center  ">
@@ -19,7 +35,7 @@ function Principal() {
               style={{ color: "#435f7a" }}
             >
               {" "}
-              Bienvenido a Mini Red Social  <i class="bi bi-chat-left-text"></i>
+              Bienvenido a Mini Red Social  <i className="bi bi-chat-left-text"></i>
             </h2>
             <p
               className="card-text "

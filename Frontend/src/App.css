@@ -31,9 +31,16 @@ body {
 .descripcion-textarea {
   min-height: 130px;
   resize: none;
-  padding-bottom: 2rem; /* para que no se solape el contador */
+  padding-bottom: 2rem; 
 }
 
+.descripcion-perfil {
+  white-space: normal;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  max-width: 100%;
+  margin: 0; /* evitar márgenes extra */
+}
 .contador-caracteres {
   position: absolute;
   bottom: 5px;
@@ -48,4 +55,251 @@ body {
   color: red;
   margin-top: 4px;
   margin-bottom: 1px;
+}
+
+.navbarPrivada{
+  background-color: #dfdfdf;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+
+
+  
+}
+
+.footer{
+  display: flex;
+  background-color: #dfdfdf;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  height: 4%;
+  justify-content: center;
+  align-items: center;
+}
+
+.textColor{
+  color:#747272
+}
+
+.underline{
+  border-bottom: 1px solid;
+}
+
+
+/* efecto de imagen al editar*/
+
+
+.avatar-wrapper {
+  position: relative;
+  width: 10vw;
+  height: 10vw;
+  border-radius: 50%;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.editarImage{
+    width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+  transition: filter 0.3s ease;
+}
+
+
+.editarImage:hover{
+  opacity: .6;
+  
+}
+
+
+.avatar-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background-color: rgba(0, 0, 0, 0.4);
+  color: white;
+  font-size: 1.5rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+.avatar-wrapper:hover .avatar-img {
+  filter: brightness(0.6);
+}
+
+.avatar-wrapper:hover .avatar-overlay {
+  opacity: 1;
+}
+
+
+/* estilo de barra de busqueda */
+
+.listaResultados {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  max-height: 200px;
+  overflow-y: auto;
+  background-color: white;
+  border: 1px solid #ddd;
+  border-top: none;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  z-index: 1000;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  user-select: none;
+}
+
+.listaResultados > li {
+  padding: 8px 12px;
+  transition: background-color 0.2s;
+}
+
+.listaResultados > li:hover {
+  background-color: #f0f0f0;
+}
+
+.listaResultados > li.item-usuario {
+  display: flex !important;
+  align-items: center;
+  gap: 10px;
+  position: relative;
+  transition: background-color 0.2s;
+}
+
+.avatar-usuario {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  transition: transform 0.2s;
+}
+
+.info-usuario {
+  display: flex;
+  flex-direction: column;
+}
+
+.info-usuario strong {
+  font-size: 0.95rem;
+  color: #333;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.descripcion-usuario {
+  font-size: 0.85rem;
+  color: #555;
+  display: -webkit-box;
+  -webkit-line-clamp: 1; /* Cambiá a 3 si querés 3 líneas */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  word-break: break-word;
+  max-width: 100%;
+}
+
+.listaResultados > li.item-usuario::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: transparent;
+  transition: background-color 0.2s;
+}
+
+.listaResultados > li.item-usuario:hover::before {
+  background-color: #007bff; 
+}
+
+.listaResultados > li.item-usuario:hover .avatar-usuario {
+  transform: scale(1.15);   
+}
+
+.contenido-usuario {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+}
+
+.boton-agregar-container {
+  flex-shrink: 0;
+}
+
+/*dropdown*/
+
+.dropdown-toggle {
+  
+  
+  padding: 10px 12px;
+  background-color: rgb(120, 108, 131);
+  transition: background-color 0.2s ease;
+  border: 1px solid black;
+  
+}
+
+.hover-avatar-button:hover {
+  transform: scale(1.01);
+  transition: transform 0.1s ease;
+}
+
+.hover-avatar-button:hover .navbar-avatar {
+  transform: scale(1.1);
+}
+
+.navbar-avatar {
+  transition: transform 0.2s ease;
+}
+
+.dropdown-menu {
+  background-color: #ffffff;
+  animation: fadeInDropdown 0.3s ease;
+  border-radius: 8px;
+  margin-top: 10px;
+  
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Transición para entrada suave del dropdown */
+@keyframes fadeInDropdown {
+  0% {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.dropdown-item:hover {
+  background-color: #f0f0f0;
+}
+
+.contenedor-principal {
+  width: 70vw;
+  min-height: 80vh;
+  max-width: 1500px;
+  display: flex;
+  justify-content: center;
+  
+  padding: 1.5rem;
+  border: 1px solid #ccc;
+  margin-top: -2%;
+  box-sizing: border-box;
+
+  background-color: white;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.06); 
+  border-radius: 8px; 
 }

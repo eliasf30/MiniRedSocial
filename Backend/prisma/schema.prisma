@@ -6,7 +6,6 @@
 
 generator client {
   provider = "prisma-client-js"
-  
 }
 
 datasource db {
@@ -15,16 +14,47 @@ datasource db {
 }
 
 model Usuario {
-  id              Int         @id @default(autoincrement())
+  id              Int       @id @default(autoincrement())
   nombre          String
   apellido        String
-  email           String      @unique
+  email           String    @unique
   password        String
   descripcion     String?
   avatar          String?
-  createdAt       DateTime    @default(now())
-  isVerified      Boolean     @default(false)
-  isAdmin         Boolean     @default(false)
+  createdAt       DateTime  @default(now())
+  isVerified      Boolean   @default(false)
+  isAdmin         Boolean   @default(false)
   fechaNacimiento DateTime?
   genero          String?
+
+  verificacionEmail    verificacionEmail[]
+  solicitudesEnviadas  SolicitudAmistad[]  @relation("solicitudesEnviadas")
+  solicitudesRecibidas SolicitudAmistad[]  @relation("solicitudesRecibidas")
+}
+
+model verificacionEmail {
+  id        Int      @id @default(autoincrement())
+  usuario   Usuario  @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  usuarioId Int
+  token     String   @unique
+  createdAt DateTime @default(now())
+}
+
+model SolicitudAmistad {
+  id         Int             @id @default(autoincrement())
+  emisor     Usuario         @relation("solicitudesEnviadas", fields: [emisorId], references: [id])
+  emisorId   Int
+  receptor   Usuario         @relation("solicitudesRecibidas", fields: [receptorId], references: [id])
+  receptorId Int
+  estado     EstadoSolicitud @default(PENDIENTE)
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
+
+  @@unique([emisorId, receptorId])
+}
+
+enum EstadoSolicitud {
+  PENDIENTE
+  ACEPTADA
+  RECHAZADA
 }

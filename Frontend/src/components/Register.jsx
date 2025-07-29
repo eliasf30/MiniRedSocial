@@ -1,13 +1,18 @@
 import { useNavigate } from "react-router";
-import { useState } from "react";
+import { useState,useEffect } from "react";
 import { useForm } from "react-hook-form";
-import "../App.css";
-
+import "../app.css"
+import { useAuth } from "../context/useAuth";
 import defaultpreview from "../images/preview.png" ;
 
-import { registrarUsuario } from "../services/userServices";
+import { registrarUsuario,loginUsuario } from "../services/userServices";
 
 function Register() {
+
+
+  
+
+  const {login} = useAuth()
   const [showPassword, setShowPassword] = useState(false);
 
   const [preview, setPreview] = useState(defaultpreview)
@@ -43,7 +48,7 @@ function Register() {
 
       const formData = new FormData();
       formData.append("nombre", data.nombre);
-      formData.append("apellido", data.apellido); // aunque no se usa aún en backend
+      formData.append("apellido", data.apellido); 
       formData.append("email", data.email);
       formData.append("password", data.contrasenia);
       formData.append("descripcion", data.descripcion || "");
@@ -56,15 +61,33 @@ function Register() {
 
       const result = await registrarUsuario(formData);
       console.log("usuario registrado: ",result)
+
+      const { token } = await loginUsuario({ email: data.email, password: data.contrasenia });
+      login(token)
+      navigate("/home")
+      
     }catch (error){
       console.error("error al registrar usuario: ",error)
-      setErrorMsg(error.message || "Error inesperado");
+      setErrorMsg(error.error || error.message || "Error inesperado");
     } finally {
     setLoading(false);
   }
   };
 
   const contrasenia = watch("contrasenia")
+
+
+  const {usuario} = useAuth()
+   useEffect(() =>{
+            if(usuario){
+            navigate("/home")
+        }
+        },[usuario,navigate])
+    
+        if (usuario) {
+        return null; 
+        }
+  
 
   return (
 
@@ -94,7 +117,7 @@ function Register() {
                 <div className="mb-3 d-flex align-items-start gap-3 descripcion-container">
                 <img src={preview} alt={preview} className="mb-3 d-flex flex-column align-items-center previewImage"/>
                   <div className="d-flex flex-column w-100">
-                <textarea {...register("descripcion", {maxLength:{value:200, message: "Maximo 200 caracteres permitidos"}})}type="text" className="form-control descripcion-textarea " placeholder="escribe una breve descripcion" style={{  minHeight: "130px", resize:"none" }}/>
+                <textarea {...register("descripcion", {maxLength:{value:200, message: "Maximo 200 caracteres permitidos"}})} maxLength={200} type="text" className="form-control descripcion-textarea " placeholder="escribe una breve descripcion" style={{  minHeight: "130px", resize:"none" }}/>
                 <p className="contador-caracteres"> {(watch("descripcion")?.length || 0)}/200 </p>
                 {errors.descripcion && (<p className="error-text">{errors.descripcion.message}</p>)}
                 </div>
