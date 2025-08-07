@@ -1,29 +1,51 @@
-import { useState } from "react";
-import { agregarAmigo } from "../../services/userServices";
+import { useEffect, useState } from "react";
+import { enviarSolicitud, obtenerEstadoAmistad } from "../../services/amistadServices";
 
 
-function BotonAgregar(amigoId, onAdded){
+function BotonAgregar({amigoId, onAdded}){
     const [loading, setLoading] = useState(false)
-    const [error, setError] = useState(null)
+    const [estado, setEstado] = useState("CARGANDO")
+
+    useEffect(() =>{
+        if (!amigoId) return;
+        const obtenerEstado = async() =>{
+            try {
+                const estadoActual = await obtenerEstadoAmistad(amigoId);
+                setEstado(estadoActual || "NINGUNO");
+            } catch (error) {
+                console.error("Error obteniendo estado de amistad:", error);
+                setEstado("NINGUNO");
+            }
+        };
+        obtenerEstado()
+    },[amigoId])
 
     const handleAdd = async() =>{
         setLoading(true)
-        setError(null)
         try {
-            await agregarAmigo(amigoId);
+            await enviarSolicitud(amigoId);
+            setEstado("PENDIENTE");
             if(onAdded) onAdded()
         } catch (error) {
-            setError("No se pudo agregar amigo");
-            alert("No se pudo agregar amigo");       
+           const mensaje = error.response?.data?.message || "No se pudo agregar amigo"   
+           alert(mensaje);
+           
         } finally{
             setLoading(false);
         }
     }
 
+    const contenido = () =>{
+        if (estado === "CARGANDO") return "⏳ Cargando...";
+        if (estado === "PENDIENTE") return "⏳ Pendiente";
+        if (estado === "ACEPTADA") return "✅ Ya son amigos";
+        return loading ? "⏳ Agregando..." : "➕ Agregar amigo";
+    }
+
     return(
         <>
-        <button onClick={handleAdd} disabled={loading} className="btn btn-sm btn-outline-secondary">
-            {loading ? "⏳ Agregando..." : "➕ Agregar amigo"}
+        <button onClick={handleAdd} disabled={loading || estado === "PENDIENTE" || estado === "ACEPTADA"} className="btn btn-sm btn-outline-secondary">
+            {contenido()}
         </button>
         </>
     )

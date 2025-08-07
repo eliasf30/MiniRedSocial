@@ -5,8 +5,9 @@ import { NavLink } from "react-router";
 import { useForm } from "react-hook-form";
 import { modificarPerfil } from "../../services/userServices";
 import { ajustarFechaSinZona } from "../../utils/formatearFechas";
-
+import { toast } from "react-toastify";
 import "../../App.css";
+import Swal from "sweetalert2";
 
 function EditarPerfil() {
   
@@ -53,6 +54,23 @@ function EditarPerfil() {
   
 
    const onSubmit = async(data) => {
+    if (!hayCambios()) {
+    toast.info("No realizaste ningún cambio");
+    navigate("/perfil")
+    return;
+  }
+
+    const resultado = await Swal.fire({
+      title: "¿Guardar cambios?",
+      text: "Estas a punto de modificar tu perfil",
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonText: "Si, guardar",
+      confirmButtonColor:"Green",
+      cancelButtonText: "Cancelar",
+      cancelButtonColor: "Red"
+    })
+    if (resultado.isConfirmed) {
     const formData = new FormData()
     
     formData.append("descripcion", data.descripcion);
@@ -72,11 +90,12 @@ function EditarPerfil() {
       fechaNacimiento: res.usuario.fechaNacimiento,
       avatar: res.usuario.avatar
     }));
-      
+      toast.success("Usuario modificado con exito")
       navigate("/perfil")
    } catch (error) {
+      toast.error("Error al modificar el usuario")
       console.error(error);
-   }
+   }}
 }
 
 
@@ -88,6 +107,22 @@ const fechaNacimientoInput = usuario?.fechaNacimiento
       return fecha.toISOString().split("T")[0];
     })()
   : "";
+
+  const hayCambios = () => {
+  const descripcion = watch("descripcion");
+  const fechaNacimiento = watch("fechaNacimiento");
+  const genero = watch("genero");
+
+  return (
+    descripcion !== usuario.descripcion ||
+    fechaNacimiento !== ajustarFechaSinZona(usuario.fechaNacimiento).toISOString().split("T")[0] ||
+    genero !== usuario.genero ||
+    selectedFile !== null
+  );
+};
+
+
+
   return (
     <>
       <div className="container d-flex align-items-start justify-content-start">

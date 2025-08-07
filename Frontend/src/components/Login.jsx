@@ -74,6 +74,7 @@ function Login() {
                   type="email"
                   className="form-control"
                   placeholder="correo@ejemplo.com"
+                  autoComplete="username"
                 />
                 {errors.email && (
                   <p className="text-danger mt-1">Email requerido</p>
@@ -87,6 +88,7 @@ function Login() {
                     type={showPassword ? "text" : "password"}
                     className="form-control"
                     placeholder={showPassword ? "Contraseña" : "••••••••"}
+                    autoComplete="current-password"
                   />
                   <button
                     type="button"

@@ -174,6 +174,7 @@ function Register() {
                   type="email"
                   className="form-control"
                   placeholder="correo@ejemplo.com"
+                  autoComplete="username"
                 />
                 {errors.email && (
                   <p className="error-text">Email requerido</p>
@@ -189,6 +190,7 @@ function Register() {
                         minLength:{value:6, message:"la contraseña debe tener al menos 6 caracteres"},
                         maxLength:{value:20, message:"la contraseña no puede tener mas de 20 caracteres"}
                      })}
+                     autoComplete="new-password"
                     type={showPassword ? "text" : "password"}
                     className="form-control"
                     placeholder={showPassword ? "Contraseña" : "••••••••"}
@@ -220,6 +222,7 @@ function Register() {
                     type={showPassword ? "text" : "password"}
                     className="form-control"
                     placeholder={showPassword ? "Confirmar contraseña" : "••••••••"}
+                    autoComplete="new-password"
                     onPaste={(e) => e.preventDefault()}
                   />
                   <button

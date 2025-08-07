@@ -18,7 +18,12 @@ import VerificarCorreo from "./components/logged/verificarCorreo";
 import VerificarCorreoPendiente from "./components/logged/verificarCorreoPendiente";
 import ProtectedRoute from "./components/logged/protectedRoute";
 import SolicitudesPendientes from "./components/social/solicitudesPendientes";
+import SolicitudesEnviadas from "./components/social/solicitudesEnviadas";
+import Amigos from "./components/social/amigos";
 
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import EditarPublicacion from "./components/post/editarPublicacion";
 
 function App() {
 
@@ -30,7 +35,7 @@ function App() {
 
       {usuario? <NavbarPrivada/> :<NavbarPublica/> }
         
-        <div style={{paddingTop:"70px"}}>
+        <div style={{paddingTop: usuario? "140px":"70px"}}>
         <Routes>
           <Route path="/" element={<Principal/>}/>
           <Route path="/descripcion" element={<Descripcion/>}/>
@@ -42,12 +47,26 @@ function App() {
           <Route path="/usuarios/:id" element={<ProtectedRoute><PerfilPublico /></ProtectedRoute>} />
           <Route path="/verificar-correo/:token" element={<VerificarCorreo />} />
           <Route path="/verificar-correo-pendiente" element={ <VerificarCorreoPendiente />} />
-          <Route path="/solicitudes-pendientes"  element={<SolicitudesPendientes/>} />
+          <Route path="/solicitudes-pendientes"  element={<ProtectedRoute><SolicitudesPendientes/></ProtectedRoute>} />
+          <Route path="/solicitudes-pendientes/enviadas" element={<ProtectedRoute><SolicitudesEnviadas/></ProtectedRoute>}/>
+          <Route path="/amigos" element={<ProtectedRoute><Amigos/></ProtectedRoute>}/>
+          <Route path="/editar-post/:id" element={<ProtectedRoute> <EditarPublicacion/></ProtectedRoute> }/>
         </Routes>
         </div>
       
       {usuario && <Footer/>}
-        
+          <ToastContainer 
+    position="top-right"
+    autoClose={3000}
+    hideProgressBar={false}
+    newestOnTop={true}
+    closeOnClick
+    rtl={false}
+    pauseOnFocusLoss
+    draggable
+    pauseOnHover
+    style={{ marginTop: "100px" }}
+  />
       </BrowserRouter>
     </>
   );

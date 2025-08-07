@@ -60,6 +60,7 @@ body {
 .navbarPrivada{
   background-color: #dfdfdf;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  
 
 
   
@@ -292,9 +293,11 @@ body {
   min-height: 80vh;
   max-width: 1500px;
   display: flex;
-  justify-content: center;
-  
+  align-items: center;
+  flex-direction: column;
   padding: 1.5rem;
+  
+  
   border: 1px solid #ccc;
   margin-top: -2%;
   box-sizing: border-box;
@@ -302,4 +305,6 @@ body {
   background-color: white;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.06); 
   border-radius: 8px; 
+  margin-bottom: 50px;
 }
+

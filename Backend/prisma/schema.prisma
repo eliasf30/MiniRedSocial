@@ -30,6 +30,7 @@ model Usuario {
   verificacionEmail    verificacionEmail[]
   solicitudesEnviadas  SolicitudAmistad[]  @relation("solicitudesEnviadas")
   solicitudesRecibidas SolicitudAmistad[]  @relation("solicitudesRecibidas")
+  posts                Post[]
 }
 
 model verificacionEmail {
@@ -57,4 +58,14 @@ enum EstadoSolicitud {
   PENDIENTE
   ACEPTADA
   RECHAZADA
+}
+
+model Post {
+  id        Int      @id @default(autoincrement())
+  contenido String?
+  imagenUrl String?
+  createdAt  DateTime @default(now())
+
+  autor   Usuario @relation(fields: [autorId], references: [id])
+  autorId Int
 }

@@ -363,7 +363,7 @@ router.patch("/amigos/:solicitudId/aceptar", verificarToken, async(req,res) =>{
   const solicitudId = parseInt(req.params.solicitudId)
 
   try {
-    const solicitud = await prisma.findUnique({
+    const solicitud = await prisma.solicitudAmistad.findUnique({
       where:{id:solicitudId}
     })
 
@@ -409,7 +409,7 @@ router.patch("/amigos/:solicitudId/rechazar", verificarToken, async(req,res) =>{
       return res.status(404).json({ error: "Solicitud no encontrada" });
     }
 
-    if(solicitud.receptorId !== userId) {
+    if(solicitud.receptorId !== usuarioId) {
       return res.status(403).json({ error: "No autorizado para rechazar esta solicitud" });
     }
 
@@ -441,7 +441,7 @@ router.get("/amigos/solicitudes-pendientes", verificarToken, async(req,res) =>{
   try {
     const solicitudesPendientes = await prisma.solicitudAmistad.findMany({
       where: {
-        receptorId: userId,
+        receptorId: usuarioId,
         estado: "PENDIENTE",
       },
       include:{
@@ -450,7 +450,7 @@ router.get("/amigos/solicitudes-pendientes", verificarToken, async(req,res) =>{
             id: true,
             nombre: true,
             apellido: true,
-            acatar: true,
+            avatar: true,
             descripcion: true,
           },
         },
