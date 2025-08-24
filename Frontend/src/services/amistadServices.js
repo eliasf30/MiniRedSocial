@@ -127,6 +127,18 @@ const obtenerAmigos = async (nombre, apellido) => {
   
 };
 
+
+
+const obtenerCantidadSolicitudes = async() =>{
+  const token = localStorage.getItem("token")
+  const res = await axios.get(`${URL}/count`, {
+    headers: {
+      Authorization: `Bearer ${token}` 
+    }
+  })
+  return res.data.cantidad;
+}
+
 export {
   obtenerEstadoAmistad,
   obtenerSolicitudes,
@@ -135,5 +147,6 @@ export {
   rechazarSolicitud,
   obtenerSolicitudesEnviadas,
   cancelarSolicitud,
-  obtenerAmigos
+  obtenerAmigos,
+  obtenerCantidadSolicitudes
 };

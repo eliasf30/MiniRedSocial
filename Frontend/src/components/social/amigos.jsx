@@ -7,15 +7,16 @@ import { obtenerAmigos } from "../../services/amistadServices";
 import { cancelarSolicitud } from "../../services/amistadServices";
 import Swal from "sweetalert2";
 import { toast } from "react-toastify";
+import { useAuth } from "../../context/useAuth";
 function Amigos() {
   const [loading, setLoading] = useState(true);
   const { register, watch } = useForm();
   const [amigos, setAmigos] = useState([]);
-
+  const { darkMode } = useAuth();
   const nombre = watch("nombre");
   const apellido = watch("apellido");
   const timeout = 500;
-
+  const URL = import.meta.env.VITE_API_URL;
   useEffect(() => {
     const delayDebounce = setTimeout(() => {
       const obtener = async () => {
@@ -25,8 +26,6 @@ function Amigos() {
             nombre?.trim() || "",
             apellido?.trim() || ""
           );
-
-          
 
           setAmigos(resultado);
         } catch (error) {
@@ -46,25 +45,26 @@ function Amigos() {
   const manejarEliminar = async (solicitudId, nombre) => {
     const nombreFormateado = formatearNombre(nombre);
     const resultado = await Swal.fire({
-    title: `¿Eliminar a ${nombreFormateado}?`,
-    text: "Para revertirlo deberas enviar nuevamente la solicitud",
-    icon: "question",
-    showCancelButton: true,
-    confirmButtonText: "Eliminar",
-    confirmButtonColor: "Red",
-    cancelButtonText: "Cancelar",
-  });
+      title: `¿Eliminar a ${nombreFormateado}?`,
+      text: "Para revertirlo deberas enviar nuevamente la solicitud",
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonText: "Eliminar",
+      confirmButtonColor: "Red",
+      cancelButtonText: "Cancelar",
+    });
     if (resultado.isConfirmed) {
-    await cancelarSolicitud(solicitudId);
-    toast.success("Usuario eliminado con exito")
-    setAmigos(amigos.filter((s) => s.solicitudId !== solicitudId));
-  }};
+      await cancelarSolicitud(solicitudId);
+      toast.success("Usuario eliminado con exito");
+      setAmigos(amigos.filter((s) => s.solicitudId !== solicitudId));
+    }
+  };
 
   return (
     <>
       <div
-        className="contenedor-principal"
-        style={{ width: "40vw", position: "relative" }}
+        className="contenedor-principal contenedor-amigos"
+        style={{ position: "relative" }}
       >
         <h3 className="mb-4 mt-2 text-muted">Lista de amigos</h3>
         <form className="ms-2 w-100">
@@ -98,14 +98,15 @@ function Amigos() {
         ) : (
           <div className="col mt-2 w-100 ">
             {amigos.map((amigo) => (
-              <div key={amigo.id} className="card m-2 mt-4 p-3 shadow-sm w-100">
+              <div
+                key={amigo.id}
+                className={`card m-2 mt-4 p-3 shadow-sm w-100 ${
+                  darkMode ? "dark-style border-secondary" : ""
+                }`}
+              >
                 <div className="d-flex align-items-center">
                   <img
-                    src={
-                      amigo.avatar
-                        ? `http://localhost:5000${amigo.avatar}`
-                        : preview
-                    }
+                    src={amigo.avatar ? `${URL}${amigo.avatar}` : preview}
                     alt="Foto de perfil"
                     className="rounded-circle me-3"
                     style={{
@@ -128,9 +129,11 @@ function Amigos() {
                     </p>
                   </div>
                 </div>
-                <div className="mt-3 d-flex justify-content-between">
+                <div className="mt-3 d-flex justify-content-between ">
                   <button
-                    className="btn btn-outline-primary btn-sm"
+                    className={`btn btn-sm ${
+                      darkMode ? "btn-outline-darkmode" : "btn-outline-primary"
+                    }`}
                     onClick={() => navigate(`/usuarios/${amigo.id}`)}
                   >
                     Ver perfil
@@ -138,7 +141,9 @@ function Amigos() {
                   <div>
                     <button
                       className="btn btn-danger btn-sm"
-                      onClick={() => manejarEliminar(amigo.solicitudId, amigo.nombre)}
+                      onClick={() =>
+                        manejarEliminar(amigo.solicitudId, amigo.nombre)
+                      }
                     >
                       Eliminar
                     </button>

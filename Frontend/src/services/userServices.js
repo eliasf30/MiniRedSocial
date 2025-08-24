@@ -78,7 +78,10 @@ const buscarUsuarios = async(query) =>{
 
 const obtenerUsuario = async(id) =>{
     try {
-        const response = await axios.get(`${URL}/${id}`)
+        const token = localStorage.getItem("token");
+        const response = await axios.get(`${URL}/${id}`,{
+             headers: token ? { Authorization: `Bearer ${token}` } : {},
+        })
         return response.data;
     } catch (error) {
          console.error("error al buscar el usuario", error)
@@ -90,5 +93,23 @@ const agregarAmigo = async(id) =>{
     console.log("agregaste de amigo a la persona con la id: ", id)
 }
 
+const cambiarVisibilidadEmail = async (visible) => {
 
-export {registrarUsuario, loginUsuario, modificarPerfil,buscarUsuarios, obtenerUsuario, verificarEmail, reenviarEmail, agregarAmigo}
+    const token = localStorage.getItem("token")
+    const res = await axios.put(`${URL}/mostrar-email`,
+        {visible},
+        {headers:{Authorization:`Bearer ${token}` }}
+    )
+    return res
+}
+
+const cambiarPrivacidadPerfil = async(estado) =>{
+    const token = localStorage.getItem("token")
+     const res = await axios.put(`${URL}/perfil-privado`,
+        {estado},
+        {headers:{Authorization:`Bearer ${token}` }}
+    )
+    return res
+}
+
+export {registrarUsuario, loginUsuario, modificarPerfil,buscarUsuarios, obtenerUsuario, verificarEmail, reenviarEmail, agregarAmigo, cambiarVisibilidadEmail, cambiarPrivacidadPerfil}

@@ -15,7 +15,7 @@ function BarraDeBusqueda() {
 
   const URL = import.meta.env.VITE_API_URL;
   const navigate = useNavigate();
-  const {usuario} = useAuth()
+  const {usuario, darkMode} = useAuth()
   useEffect(() => {
     if (deboundedQuery.trim() === "") {
       setResultados([]);
@@ -34,7 +34,7 @@ function BarraDeBusqueda() {
 
   return (
     <>
-      <div className="w-75 mx-auto mt-3" style={{ position: "relative" }}>
+      <div className="col-12 col-lg-9 mx-auto mt-3" style={{ position: "relative" }}>
         <input
           type="text"
           className="form-control"
@@ -65,11 +65,11 @@ function BarraDeBusqueda() {
                     className="avatar-usuario"
                   />
                   <div className="info-usuario">
-                    <strong>
+                    <strong style={{color: darkMode? "#F0F0F0":"black"}}>
                        {formatearNombre(user.nombre)}  {formatearNombre(user.apellido)}
                     </strong>
                     {user.descripcion && (
-                      <p className="descripcion-usuario">{user.descripcion}</p>
+                      <p className="descripcion-usuario" style={{color: darkMode && "#cccccc"}} >{user.descripcion}</p>
                     )}
                   </div>
                 </div>

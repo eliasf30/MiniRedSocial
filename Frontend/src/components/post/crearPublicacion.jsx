@@ -6,9 +6,9 @@ import { toast } from "react-toastify";
 import Picker from "@emoji-mart/react";
 import data from "@emoji-mart/data";
 import GraphemeSplitter from "grapheme-splitter";
-  
+
 function CrearPublicacion({ onPublicar }) {
-  const { usuario } = useAuth();
+  const { usuario,darkMode } = useAuth();
   const [loading, setLoading] = useState(false);
   const [imagenUrl, setImagemUrl] = useState("");
   const [previewImagen, setPreviewImagen] = useState(null);
@@ -80,7 +80,7 @@ function CrearPublicacion({ onPublicar }) {
     }
   };
 
-   useEffect(() => {
+  useEffect(() => {
     const currentCount = splitter.countGraphemes(contenido);
     if (currentCount >= 500 && mostrarEmojis) {
       setMostrarEmojis(false);
@@ -104,9 +104,9 @@ function CrearPublicacion({ onPublicar }) {
                 borderRadius: "0.375rem",
               }}
             />
-            <p className="contador-caracteres mb-1 me-2">
+            <p className="contador-caracteres mb-1 me-2 d-none d-md-inline">
               {" "}
-               {splitter.countGraphemes(contenido)}/500
+              {splitter.countGraphemes(contenido)}/500
             </p>
           </div>
 
@@ -114,51 +114,59 @@ function CrearPublicacion({ onPublicar }) {
             className=" d-flex align-items-center mt-3 rounded px-2 py-1 "
             style={{ position: "relative" }}
           >
-            <div className="d-flex align-items-center  rounded px-2 py-1" style={{ position: "relative", flexShrink:0 }}> 
-            <button
-              type="button"
-              className="btn btn-outline-secondary btn-sm me-2"
-              onClick={() => setMostrarEmojis((prev) => !prev)}
-              disabled={splitter.countGraphemes(contenido) >= 500}
+            <div
+              className="d-flex align-items-center  rounded py-1 me-2"
+              style={{ position: "relative", flexShrink: 0 }}
             >
-              {" "}
-              😊 Emoji
-            </button>
-            {mostrarEmojis && (
-              <div
-                ref={pickerRef}
-                style={{
-                  position: "absolute",
-                  zIndex: 9999,
-                  top: "0",
-                  left: "5.5rem",
-                }}
+              <button
+                type="button"
+                className="btn btn-outline-secondary btn-sm me-2 d-none d-md-inline"
+                onClick={() => setMostrarEmojis((prev) => !prev)}
+                disabled={splitter.countGraphemes(contenido) >= 500}
               >
-                <Picker
-                  data={data}
-                  onEmojiSelect={handleEmojiClick}
-                  locale="es"
-                  theme="light"
-                />
-              </div>
-            )}
-            <label
-              htmlFor="imagen"
-              className="btn btn-outline-secondary btn-sm  "
-            >
-              <i className="bi bi-image m-1"></i>
-              Agregar imagen
-            </label>
-            {imagen && imagen.length > 0 && (
-              <span className="text-success small m-1 shadow-sm p-1">
-                {imagen[0]?.name}
-              </span>
-            )}
+                😊 Emoji
+              </button>
+
+              <button
+                type="button"
+                className="btn btn-outline-secondary btn-sm me-2 d-inline d-md-none"
+                onClick={() => setMostrarEmojis((prev) => !prev)}
+                disabled={splitter.countGraphemes(contenido) >= 500}
+              >
+                😊
+              </button>
+
+              {mostrarEmojis && (
+                <div
+                  ref={pickerRef}
+                  style={{
+                    position: "absolute",
+                    zIndex: 9999,
+                    top: "100%",
+                    left: "0",
+                    marginTop: "0.5rem",
+                  }}
+                >
+                  <Picker
+                    data={data}
+                    onEmojiSelect={handleEmojiClick}
+                    locale="es"
+                    theme={darkMode?"dark": "light"}
+                  />
+                </div>
+              )}
+              <label
+                htmlFor="imagen"
+                className="btn btn-outline-secondary btn-sm  "
+              >
+                <i className="bi bi-image m-1 "></i>
+                Agregar imagen
+              </label>
             </div>
             <div className="d-flex w-100 justify-content-end mt-auto">
               <button
                 type="submit"
-                className="  btn btn-primary  px-4 py-2 "
+                className="  btn btn-primary px-4 py-2 publicarButton"
                 disabled={loading}
               >
                 {loading ? "Publicando..." : "Publicar"}
@@ -166,18 +174,29 @@ function CrearPublicacion({ onPublicar }) {
             </div>
           </div>
           {previewImagen && (
-            <div className="mt-2">
+            <div className="mt-2 position-relative">
+              <button
+                className="btn p-3 mt-3 border-0 bg-transparent"
+                onClick={() => setPreviewImagen(null)}
+                style={{
+                  position: "absolute",
+                  right: 0,
+                  top: 0,
+                }}
+              >
+                <i className="bi bi-trash " style={{ fontSize: "1.1rem" }}></i>
+              </button>
               <img
                 src={previewImagen}
                 alt="Vista previa"
-                className="mt-3 max-h-96 w-full object-cover rounded-xl "
+                className="mt-3 max-h-96 w-full object-cover rounded-xl img-background"
                 style={{
                   width: "100%",
                   maxHeight: "600px",
                   objectFit: "contain",
                   borderRadius: "0.75rem",
                   marginTop: "1rem",
-                  backgroundColor: "#f0f0f0",
+                  
                 }}
               />
             </div>

@@ -101,6 +101,14 @@ router.post("/:receptorId", verificarToken, async (req, res) => {
   const emisorId = req.usuario.id;
   const receptorId = parseInt(req.params.receptorId);
 
+const usuario = await prisma.usuario.findUnique({
+    where: {id: req.usuario.id}
+  });
+
+  if(!usuario.isVerified){
+    return res.status(403).json({message: "Debes verificar tu email antes de enviar"})
+  }
+
   if (emisorId === receptorId) {
     return res
       .status(400)
@@ -330,5 +338,27 @@ router.delete(
     }
   }
 );
+
+
+router.get("/count", verificarToken, async(req,res) => {
+
+  const usuarioId = Number(req.usuario.id)
+
+  try {
+    const count = await prisma.solicitudAmistad.count({
+      where: {
+        receptorId: usuarioId,
+        estado: "PENDIENTE"
+      }
+    });
+    res.json({cantidad: count})
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Error al contar solicitudes" });
+    
+  }
+})
+
+
 
 export default router;

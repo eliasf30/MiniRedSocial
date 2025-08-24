@@ -26,11 +26,15 @@ model Usuario {
   isAdmin         Boolean   @default(false)
   fechaNacimiento DateTime?
   genero          String?
+  EmailVisible    Boolean  @default(false)
+  PerfilPrivado   Boolean  @default(false)
 
   verificacionEmail    verificacionEmail[]
   solicitudesEnviadas  SolicitudAmistad[]  @relation("solicitudesEnviadas")
   solicitudesRecibidas SolicitudAmistad[]  @relation("solicitudesRecibidas")
   posts                Post[]
+  mensajesEnviados     Mensaje[]           @relation("MensajesEnviados")
+  mensajesRecibidos    Mensaje[]           @relation("MensajesRecibidos")
 }
 
 model verificacionEmail {
@@ -43,9 +47,9 @@ model verificacionEmail {
 
 model SolicitudAmistad {
   id         Int             @id @default(autoincrement())
-  emisor     Usuario         @relation("solicitudesEnviadas", fields: [emisorId], references: [id])
+  emisor     Usuario         @relation("solicitudesEnviadas", fields: [emisorId], references: [id], onDelete: Cascade)
   emisorId   Int
-  receptor   Usuario         @relation("solicitudesRecibidas", fields: [receptorId], references: [id])
+  receptor   Usuario         @relation("solicitudesRecibidas", fields: [receptorId], references: [id], onDelete: Cascade)
   receptorId Int
   estado     EstadoSolicitud @default(PENDIENTE)
   createdAt  DateTime        @default(now())
@@ -64,8 +68,24 @@ model Post {
   id        Int      @id @default(autoincrement())
   contenido String?
   imagenUrl String?
-  createdAt  DateTime @default(now())
+  createdAt DateTime @default(now())
 
-  autor   Usuario @relation(fields: [autorId], references: [id])
+  autor   Usuario @relation(fields: [autorId], references: [id], onDelete: Cascade)
   autorId Int
+}
+
+model Mensaje {
+  id         Int      @id @default(autoincrement())
+  contenido  String?
+  imagenUrl  String?
+  emisorId   Int
+  receptorId Int
+  createdAt  DateTime @default(now())
+  leido      Boolean  @default(false)
+
+  emisor   Usuario @relation("MensajesEnviados", fields: [emisorId], references: [id], onDelete: Cascade)
+  receptor Usuario @relation("MensajesRecibidos", fields: [receptorId], references: [id], onDelete: Cascade)
+
+  @@index([emisorId, receptorId])
+  @@index([receptorId, emisorId])
 }

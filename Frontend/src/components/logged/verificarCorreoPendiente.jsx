@@ -6,10 +6,11 @@ import { useNavigate } from "react-router";
 
 function VerificarCorreoPendiente() {
 
-    const {usuario, setUsuario} = useAuth()
+    const {usuario, setUsuario,darkMode }= useAuth()
     const navigate = useNavigate()
      const [enviando, setEnviando] = useState(false);
      const [enviado, setEnviado] = useState(false);
+
 
 useEffect(() => {
   if (!usuario) {
@@ -44,8 +45,10 @@ useEffect(() => {
     }
 
   return (
-    <div className="container mt-5 p-4 bg-white rounded shadow text-center " style={{ padding: 20 }}>
-      <h2 className="mb-3 text-secondary"> Tu cuenta no está verificada</h2>
+    <div className={`container mt-5 p-4 rounded shadow text-center ${
+      darkMode ? "bg-dark text-light" : "bg-white text-dark"
+    }`} style={{ padding: 20 }}>
+      <h2 className={darkMode ? "text-light" : "text-secondary"}> Tu cuenta no está verificada</h2>
       <p>Por favor revisa tu correo y haz click en el enlace para verificar tu cuenta.</p>
       <p className="text-muted mb-4">Si no recibiste el correo, revisa la carpeta de spam o solicita uno nuevo.</p>
       {enviado && <div className="alert alert-info mt-3 text-sm">Correo reenviado. revisa tu bandeja de entrada</div>}

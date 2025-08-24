@@ -11,6 +11,7 @@ import { NavLink, useNavigate } from "react-router";
 import { useForm } from "react-hook-form";
 import { editarPublicacion } from "../../services/publicacionesServices";
 import Swal from "sweetalert2";
+import { useAuth } from "../../context/useAuth";
 
 function EditarPublicacion({ onModificar }) {
   const { id } = useParams();
@@ -22,10 +23,11 @@ function EditarPublicacion({ onModificar }) {
   const navigate = useNavigate();
   const splitter = new GraphemeSplitter();
   const pickerRef = useRef(null);
+  const {darkMode} = useAuth()
 
   const [imagen, setImagen] = useState(null);
   const [previewImagen, setPreviewImagen] = useState(null);
-  const [modificando, setModificando] = useState(false)
+  const [modificando, setModificando] = useState(false);
   const { register, handleSubmit, watch } = useForm();
   const imagenUrlWatch = watch("imagenUrl");
   useEffect(() => {
@@ -91,34 +93,34 @@ function EditarPublicacion({ onModificar }) {
     }
 
     const resultado = await Swal.fire({
-          title: "¿Guardar cambios?",
-          text: "Estas a punto de modificar tu Publicacion",
-          icon: "question",
-          showCancelButton: true,
-          confirmButtonText: "Si, guardar",
-          confirmButtonColor:"Green",
-          cancelButtonText: "Cancelar",
-          cancelButtonColor: "Red"
-        })
-        if (resultado.isConfirmed) {
+      title: "¿Guardar cambios?",
+      text: "Estas a punto de modificar tu Publicacion",
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonText: "Si, guardar",
+      confirmButtonColor: "Green",
+      cancelButtonText: "Cancelar",
+      cancelButtonColor: "Red",
+    });
+    if (resultado.isConfirmed) {
+      const formData = new FormData();
+      formData.append("contenido", contenido);
+      if (imagen) formData.append("imagen", imagen);
+      setModificando(true);
 
-    const formData = new FormData();
-    formData.append("contenido", contenido);
-    if (imagen) formData.append("imagen", imagen);
-    setModificando(true)
+      try {
+        await editarPublicacion(id, formData);
+        toast.success("Publicación Modificada con éxito");
+        if (onModificar) onModificar();
 
-    try {
-      await editarPublicacion(id, formData);
-      toast.success("Publicación Modificada con éxito");
-      if (onModificar) onModificar();
-
-      setContenido("");
-      navigate("/home");
-    } catch (error) {
-      toast.error(`Error al modificar publicación: ${error.message}`);
-    } finally {
-      setModificando(false)
-    }}
+        setContenido("");
+        navigate("/home");
+      } catch (error) {
+        toast.error(`Error al modificar publicación: ${error.message}`);
+      } finally {
+        setModificando(false);
+      }
+    }
   };
 
   if (loading) return <p>Cargando publicación...</p>;
@@ -127,34 +129,27 @@ function EditarPublicacion({ onModificar }) {
   return (
     <>
       <div
-        className="shadow-sm border p-3 center mt-4 position-relative"
-        style={{ width: "60vw", marginBottom: "100px" }}
+        className="shadow-sm border p-3 center mt-4 contenedor-principal"
+        style={{ marginBottom: "100px" }}
       >
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <div
-            className="d-flex align-items-center mb-2 w-100"
-            style={{ gap: "1rem" }}
-          >
+        <form onSubmit={handleSubmit(onSubmit)} className="w-100">
+          <div className="d-flex align-items-start gap-3 w-100">
             <img
               src={
                 post.autor.avatar ? `${API_URL}${post.autor.avatar}` : preview
               }
               alt="Avatar"
-              style={{
-                width: "60px",
-                height: "60px",
-                borderRadius: "50%",
-                objectFit: "cover",
-                flexShrink: 0,
-              }}
+              draggable="false"
+              className="rounded-circle flex-shrink-0"
+              style={{ width: "60px", height: "60px", objectFit: "cover" }}
             />
-            <div className="d-flex flex-row w-100 ">
-              <h5 className="font-semibold text-muted">
+            <div className="flex-grow-1">
+              <h5 className="mb-1" >
                 {formatearNombre(post.autor.nombre)}{" "}
                 {formatearNombre(post.autor.apellido)}
               </h5>
-              <p className="text-muted" style={{ marginLeft: "5%" }}>
-                {`${new Date(post.createdAt).toLocaleString("es-AR")}`}
+              <p className="text-muted" style={{ fontSize: "0.85rem" }}>
+                {new Date(post.createdAt).toLocaleString("es-AR")}
               </p>
             </div>
           </div>
@@ -172,7 +167,7 @@ function EditarPublicacion({ onModificar }) {
                 borderRadius: "0.375rem",
               }}
             ></textarea>
-            <p className="contador-caracteres mb-2 me-2">
+            <p className="contador-caracteres mb-2 me-2  d-none d-md-inline">
               {splitter.countGraphemes(contenido)}/500
             </p>
           </div>
@@ -181,15 +176,29 @@ function EditarPublicacion({ onModificar }) {
             className="d-flex align-items-center mt-2 rounded px-2 py-1"
             style={{ position: "relative" }}
           >
-            <div
-              className="d-flex align-items-center rounded px-2 py-1"
-              style={{ position: "relative", flexShrink: 0 }}
-            >
+            <div className="d-flex  align-items-center rounded px-2 py-1 me-auto">
               <button
                 type="button"
-                className="btn btn-outline-secondary btn-sm me-2"
+                className="btn btn-outline-secondary btn-sm me-3 d-inline d-lg-none"
                 onClick={() => setMostrarEmojis((prev) => !prev)}
                 disabled={splitter.countGraphemes(contenido) >= 500}
+              >
+                😊
+              </button>
+
+              <label
+                htmlFor="imagen"
+                className="btn btn-outline-secondary btn-sm d-inline d-lg-none"
+              >
+                <i className="bi bi-image"></i>
+              </label>
+
+              <button
+                type="button"
+                className="btn btn-outline-secondary btn-sm me-2 d-none d-lg-inline"
+                onClick={() => setMostrarEmojis((prev) => !prev)}
+                disabled={splitter.countGraphemes(contenido) >= 500}
+                style={{ flexShrink: 0 }}
               >
                 😊 Emoji
               </button>
@@ -199,24 +208,24 @@ function EditarPublicacion({ onModificar }) {
                   style={{
                     position: "absolute",
                     zIndex: 9999,
-                    top: "0",
-                    left: "5.5rem",
+                    top: "100%",
+                    left: "0",
                   }}
                 >
                   <Picker
                     data={data}
                     onEmojiSelect={handleEmojiClick}
                     locale="es"
-                    theme="light"
+                    theme={darkMode?"dark": "light"}
                   />
                 </div>
               )}
               <label
                 htmlFor="imagen"
-                className="btn btn-outline-secondary btn-sm"
+                className="btn btn-outline-secondary btn-sm d-none d-lg-inline"
+                style={{ flexShrink: 0 }}
               >
-                <i className="bi bi-image m-1"></i>
-                Agregar/Cambiar Imagen
+                <i className="bi bi-image m-1"></i> Agregar imagen
               </label>
             </div>
 
@@ -224,28 +233,31 @@ function EditarPublicacion({ onModificar }) {
               <button
                 type="button"
                 className="btn btn-secondary px-4 py-2 me-2"
-                onClick={() => navigate("/")   }
+                onClick={() => navigate("/")}
                 disabled={modificando}
               >
                 Cancelar
               </button>
-              <button type="submit" className="btn btn-success px-4 py-2" disabled={modificando}>
-                {modificando? "Modificando..." : "Confirmar" }
+              <button
+                type="submit"
+                className="btn btn-success px-4 py-2"
+                disabled={modificando}
+              >
+                {modificando ? "Modificando..." : "Confirmar"}
               </button>
             </div>
           </div>
-          {post.imagenUrl && (
+          {(previewImagen || post.imagenUrl) && (
             <img
               src={previewImagen || post.imagenUrl}
               alt="Imagen del post"
-              className="mt-3 max-h-96 w-full object-cover rounded-xl"
+              className="mt-3 max-h-96 w-full object-cover rounded-xl img-background"
               style={{
                 width: "100%",
                 maxHeight: "600px",
                 objectFit: "contain",
                 borderRadius: "0.75rem",
                 marginTop: "1rem",
-                backgroundColor: "#f0f0f0",
               }}
             />
           )}

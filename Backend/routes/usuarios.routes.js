@@ -8,7 +8,8 @@ import jwt from "jsonwebtoken";
 import { verificarToken } from "../middlewares/authMiddleware.js";
 import { enviarCorreoVerificacion } from "../utils/mailer.js";
 import crypto from "crypto";
-
+import axios from "axios";
+import { multerErrorHandler } from "../middlewares/multerErrorHandler.js"
 const router = Router();
 const prisma = new PrismaClient();
 
@@ -37,19 +38,51 @@ const fileFilter = (req, file, cb) => {
 
 const upload = multer({
   storage: storage,
-  limits: { fileSize: 2 * 1024 * 1024 },
+  limits: { fileSize: 5 * 1024 * 1024 },
   fileFilter: fileFilter,
 });
 
 router.post("/register", upload.single("avatar"), async (req, res) => {
-  const { nombre, apellido, email, password, descripcion } = req.body;
+  const { nombre, apellido, email, password, descripcion, captcha } = req.body;
+
+  if (!captcha) {
+    return res.status(400).json({ error: "Captcha faltante" });
+  }
 
   const avatarPath = req.file
     ? `/uploads/${path.basename(req.file.path)}`
     : `/avatars/default-avatar.jpg`;
   try {
+    const response = await axios.post(
+      `https://www.google.com/recaptcha/api/siteverify?secret=${process.env.RECAPTCHA_SECRET_KEY}&response=${captcha}`
+    );
+
+    const data = response.data;
+
+    if (!data.success ||  data.score < 0.5) {
+      return res.status(400).json({ error: "Captcha inválido o sospechoso" });
+    }
+
     if (!nombre || !email || !password || !apellido) {
       return res.status(400).json({ error: "faltan datos obligatorios" });
+    }
+
+    if (nombre.length < 2 || nombre.length > 30) {
+      return res
+        .status(400)
+        .json({ error: "Nombre inválido (2-30 caracteres)" });
+    }
+
+    if (apellido.length < 2 || apellido.length > 30) {
+      return res
+        .status(400)
+        .json({ error: "Apellido inválido (2-30 caracteres)" });
+    }
+
+    if (descripcion && descripcion.length > 200) {
+      return res
+        .status(400)
+        .json({ error: "Descripción demasiado larga (máximo 200 caracteres)" });
     }
 
     const existingUser = await prisma.usuario.findUnique({ where: { email } });
@@ -72,18 +105,38 @@ router.post("/register", upload.single("avatar"), async (req, res) => {
       },
     });
 
-    const token = crypto.randomBytes(32).toString("hex")
+    const botId = 2;
+    await prisma.solicitudAmistad.create({
+      data: {
+        emisorId: botId,
+        receptorId: user.id,
+        estado: "ACEPTADA",
+      },
+    });
+
+    const io = req.app.locals.io;
+
+    const mensaje = await prisma.mensaje.create({
+      data: {
+        emisorId: botId,
+        receptorId: user.id,
+        contenido:
+          "¡Hola! 👋 Bienvenido al chat de prueba. Acá podés probar cómo funciona: enviar mensajes de texto, emojis o incluso imágenes.      ",
+      },
+    });
+    io.to(user.id).emit("nuevo-mensaje", mensaje);
+
+    const token = crypto.randomBytes(32).toString("hex");
 
     await prisma.verificacionEmail.create({
       data: {
         token,
-        usuarioId: user.id
+        usuarioId: user.id,
       },
-    })
+    });
 
-    await enviarCorreoVerificacion(user.email, token)
-    console.log("Mail enviado a:", user.email)
-  
+    await enviarCorreoVerificacion(user.email, token);
+
     res.status(201).json({
       message: "Usuario creado. Verifica tu correo para activar la cuenta.",
       user: {
@@ -92,7 +145,7 @@ router.post("/register", upload.single("avatar"), async (req, res) => {
         apellido: user.apellido,
         email: user.email,
         avatar: user.avatar,
-        isVerified: user.isVerified
+        isVerified: user.isVerified,
       },
     });
   } catch (error) {
@@ -101,24 +154,24 @@ router.post("/register", upload.single("avatar"), async (req, res) => {
   }
 });
 
-router.get("/verificar-correo/:token", async(req,res) =>{
-  const {token} = req.params;
-   if (!token) {
-    return res.status(400).json({ message: 'Token no proporcionado' });
+router.get("/verificar-correo/:token", async (req, res) => {
+  const { token } = req.params;
+  if (!token) {
+    return res.status(400).json({ message: "Token no proporcionado" });
   }
 
   try {
     const registro = await prisma.verificacionEmail.findUnique({
-      where: {token},
-      include:{usuario: true},
-    })
+      where: { token },
+      include: { usuario: true },
+    });
 
-    if(!registro){
+    if (!registro) {
       const posibleUsuario = await prisma.usuario.findFirst({
         where: {
           verificacionEmail: { none: { token } },
-          isVerified: true
-        }
+          isVerified: true,
+        },
       });
 
       if (posibleUsuario) {
@@ -129,57 +182,53 @@ router.get("/verificar-correo/:token", async(req,res) =>{
     }
 
     if (registro.usuario.isVerified) {
-      return res.json({ message: "Correo verificado exitosamente"  });
+      return res.json({ message: "Correo verificado exitosamente" });
     }
 
-   const usuarioActualizado = await prisma.usuario.update({
-  where: { id: registro.usuarioId },
-  data: { isVerified: true }
-});
+    const usuarioActualizado = await prisma.usuario.update({
+      where: { id: registro.usuarioId },
+      data: { isVerified: true },
+    });
 
     await prisma.verificacionEmail.delete({
-      where: {id: registro.id}
-    })
+      where: { id: registro.id },
+    });
 
     res.json({
-  message: "Correo verificado con éxito",
-  usuario: usuarioActualizado  
+      message: "Correo verificado con éxito",
+      usuario: usuarioActualizado,
+    });
+  } catch (error) {
+    console.error("error verificando correo: ", error);
+    res.status(500).json({ message: "error interno del servidor" });
+  }
 });
 
+router.post("/reenviar-verificacion", async (req, res) => {
+  const { email } = req.body;
+  const user = await prisma.usuario.findUnique({ where: { email } });
 
-  } catch (error) {
-    console.error("error verificando correo: ", error)
-    res.status(500).json({message: "error interno del servidor"})
-  }
+  if (!user) return res.status(404).json({ message: "usuario no encontrado" });
+  if (user.isVerified)
+    return res.status(400).json({ message: "el usuario ya esta verificado" });
 
-})
-
-router.post("/reenviar-verificacion", async(req,res) =>{
-  const {email} = req.body
-  const user = await prisma.usuario.findUnique({where: {email}})
-
-  if(!user) return res.status(404).json({message: "usuario no encontrado"})
-  if(user.isVerified) return res.status(400).json({message: "el usuario ya esta verificado"})
-
-    await prisma.verificacionEmail.deleteMany({
-    where: { usuarioId: user.id }
+  await prisma.verificacionEmail.deleteMany({
+    where: { usuarioId: user.id },
   });
 
   const token = crypto.randomBytes(32).toString("hex");
-  
-   await prisma.verificacionEmail.create({
+
+  await prisma.verificacionEmail.create({
     data: {
       token,
-      usuarioId: user.id
+      usuarioId: user.id,
     },
   });
 
   await enviarCorreoVerificacion(user.email, token);
 
-  res.json({message: "correo de verificacion reenviado"})
-
-})
-
+  res.json({ message: "correo de verificacion reenviado" });
+});
 
 router.post("/login", async (req, res) => {
   const { email, password } = req.body;
@@ -209,7 +258,9 @@ router.post("/login", async (req, res) => {
         fechaNacimiento: user.fechaNacimiento,
         isVerified: user.isVerified,
         avatar: user.avatar,
-        createdAt: user.createdAt
+        createdAt: user.createdAt,
+        EmailVisible: user.EmailVisible,
+        PerfilPrivado: user.PerfilPrivado,
       },
       process.env.JWT_SECRET,
       { expiresIn: "1d" }
@@ -238,238 +289,97 @@ router.get("/", async (req, res) => {
     const usuarios = await prisma.usuario.findMany();
     res.json(usuarios);
   } catch (error) {
-    console.log(error);
+    console.error(error);
     res.status(500).json({ error: "error al consultar usuarios" });
   }
 });
 
-router.get("/buscar", async (req,res) =>{
-
+router.get("/buscar", async (req, res) => {
   const query = req.query.query;
 
-  if(!query || typeof query !== "string"){
-    return res.status(400).json({error:"consulta invalida"})
+  if (!query || typeof query !== "string") {
+    return res.status(400).json({ error: "consulta invalida" });
   }
 
   const usuarios = await prisma.usuario.findMany({
-    where:{
-      OR:[
-        {nombre: {contains: query, mode:"insensitive"}},
-        {apellido: {contains: query, mode: "insensitive"}},
-        {email: {contains: query, mode: "insensitive"}}
+    where: {
+      OR: [
+        { nombre: { contains: query, mode: "insensitive" } },
+        { apellido: { contains: query, mode: "insensitive" } },
+        { email: { contains: query, mode: "insensitive" } },
       ],
     },
     take: 10,
-    select:{
-      id:true,
+    select: {
+      id: true,
       nombre: true,
       apellido: true,
       avatar: true,
-      descripcion: true
+      descripcion: true,
     },
-  })
-    res.json(usuarios);
-})
+  });
+  res.json(usuarios);
+});
 
-
-
-
-
-
-
-router.post("/perfil/editar",   verificarToken, upload.single("avatar"), async(req,res) => {
-  
-  const {genero,fechaNacimiento,descripcion} = req.body
+router.post(
+  "/perfil/editar",
+  verificarToken,
+  upload.single("avatar"),
+  async (req, res) => {
+    const { genero, fechaNacimiento, descripcion } = req.body;
 
     const avatarPath = req.file
-    ? `/uploads/${path.basename(req.file.path)}`
-    : null;
- 
-  try {
+      ? `/uploads/${path.basename(req.file.path)}`
+      : null;
+
+    try {
       const usuarioActualizado = await prisma.usuario.update({
-        where: {id: req.usuario.id},
-        data:{
+        where: { id: req.usuario.id },
+        data: {
           genero,
-          fechaNacimiento: fechaNacimiento ? new Date(fechaNacimiento) : undefined,
+          fechaNacimiento: fechaNacimiento
+            ? new Date(fechaNacimiento)
+            : undefined,
           descripcion,
           ...(avatarPath && { avatar: avatarPath }),
         },
       });
       res.json({
-  mensaje: "Perfil actualizado correctamente",
-  usuario: {
-        id: usuarioActualizado.id,
-        nombre: usuarioActualizado.nombre,
-        apellido: usuarioActualizado.apellido,
-        email: usuarioActualizado.email,
-        avatar: usuarioActualizado.avatar,
-        descripcion: usuarioActualizado.descripcion,
-        genero: usuarioActualizado.genero,
-        fechaNacimiento: usuarioActualizado.fechaNacimiento,
-        createdAt:usuarioActualizado.createdAt,
-  },
-});
-  } catch (error) {
-    res.status(500).json({ error: "Error al actualizar el perfil" });
-  }
-})
-
-
-router.post("/amigos/:receptorId", verificarToken, async(req,res) =>{
-
-  const emisorId = req.usuario.id
-  const receptorId = parseInt(req.params.receptorId)
-
-  if (emisorId === receptorId){
-    return res.status(400).json({error: "no te podes enviar solicitud a vos mismo"})
-  }
-
-  try {
-    const solicitudExistente = await prisma.solicitudAmistad.findFirst({
-      where: {
-        OR:[
-          {emisorId, receptorId},
-          {emisorId: receptorId, receptorId: emisorId},
-        ],
-      },
-    });
-
-    if(solicitudExistente){
-      return res.status(400).json({error: "ya existe una solicitud o amistad entre usuarios"})
-    }
-
-    const nuevaSolicitud = await prisma.solicitudAmistad.create({
-      data:{
-        emisorId,
-        receptorId,
-        estado: "PENDIENTE",
-      }
-    })
-
-    res.status(201).json({
-      message: "solicitud de amistad enviada",
-      solicitud: nuevaSolicitud,
-    });  
-  } catch (error) {
-       console.error("Error enviando solicitud de amistad:", error);
-       res.status(500).json({ error: "Error interno del servidor" });
-  }
-
-})
-
-router.patch("/amigos/:solicitudId/aceptar", verificarToken, async(req,res) =>{
-  
-  const usuarioId = req.usuario.id;
-  const solicitudId = parseInt(req.params.solicitudId)
-
-  try {
-    const solicitud = await prisma.solicitudAmistad.findUnique({
-      where:{id:solicitudId}
-    })
-
-    if(!solicitud){
-      return res.status(404).json({error:"Solicitud no encontrada"});
-    }
-
-    if(!solicitud.receptorId !== usuarioId){
-      return res.status(404).json({error: "No autorizado para aceptar esta solicitud"})
-    }
-
-    if(solicitud.estado !== "PENDIENTE"){
-      return res.status(400).json({error: "La solicitud ya fue procesada previamente"})
-    }
-
-    const solicitudActualizada = await prisma.solicitudAmistad.update({
-      where: {id: solicitudId},
-      data: {estado: "ACEPTADA"}
-    });
-
-    res.json({
-      message: "Solicitud aceptada",
-      solicitud: solicitudActualizada
-    })
-  
-  } catch (error) {
-    console.error("Error aceptando solicitud:", error);
-    res.status(500).json({ error: "Error interno del servidor" });
-  }
-});
-
-router.patch("/amigos/:solicitudId/rechazar", verificarToken, async(req,res) =>{
-  
-  const usuarioId = req.usuario.id;
-  const solicitudId = parseInt(req.params.solicitudId)
-
-  try {
-      const solicitud = await prisma.solicitudAmistad.findUnique({
-      where: { id: solicitudId },
-    });
-
-    if(!solicitud) {
-      return res.status(404).json({ error: "Solicitud no encontrada" });
-    }
-
-    if(solicitud.receptorId !== usuarioId) {
-      return res.status(403).json({ error: "No autorizado para rechazar esta solicitud" });
-    }
-
-    if (solicitud.estado !== "PENDIENTE") {
-      return res.status(400).json({ error: "La solicitud ya fue procesada" });
-    }
-
-     const solicitudActualizada = await prisma.solicitudAmistad.update({
-      where: { id: solicitudId },
-      data: { estado: "RECHAZADA" },
-    });
-
-
-    res.json({
-      message: "Solicitud rechazada",
-      solicitud: solicitudActualizada,
-    });
-
-  } catch (error) {
-    console.error("Error rechazando solicitud:", error);
-    res.status(500).json({ error: "Error interno del servidor" });
-  }
-
-})
-
-router.get("/amigos/solicitudes-pendientes", verificarToken, async(req,res) =>{
-  const usuarioId = req.usuario.id
-
-  try {
-    const solicitudesPendientes = await prisma.solicitudAmistad.findMany({
-      where: {
-        receptorId: usuarioId,
-        estado: "PENDIENTE",
-      },
-      include:{
-        emisor:{
-          select:{
-            id: true,
-            nombre: true,
-            apellido: true,
-            avatar: true,
-            descripcion: true,
-          },
+        mensaje: "Perfil actualizado correctamente",
+        usuario: {
+          id: usuarioActualizado.id,
+          nombre: usuarioActualizado.nombre,
+          apellido: usuarioActualizado.apellido,
+          email: usuarioActualizado.email,
+          avatar: usuarioActualizado.avatar,
+          descripcion: usuarioActualizado.descripcion,
+          genero: usuarioActualizado.genero,
+          fechaNacimiento: usuarioActualizado.fechaNacimiento,
+          createdAt: usuarioActualizado.createdAt,
         },
-      },
-      orderBy: {
-        createdAt:"desc",
-      },
-    });
-    res.json(solicitudesPendientes);
-
-  } catch (error) {
-    console.error("Error obteniendo solicitudes pendientes:", error);
-    res.status(500).json({ error: "Error interno del servidor" });
+      });
+    } catch (error) {
+      res.status(500).json({ error: "Error al actualizar el perfil" });
+    }
   }
-})
-
+);
 
 router.get("/:id", async (req, res) => {
   const { id } = req.params;
+
+  let solicitanteId = null;
+
+  // Verificamos si hay token
+  const authHeader = req.headers.authorization;
+  if (authHeader?.startsWith("Bearer ")) {
+    const token = authHeader.split(" ")[1];
+    try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      solicitanteId = decoded.id; // id del usuario logueado
+    } catch (err) {
+      console.error("Token inválido, visitante anónimo");
+    }
+  }
 
   try {
     const usuario = await prisma.usuario.findUnique({
@@ -480,12 +390,91 @@ router.get("/:id", async (req, res) => {
       return res.status(404).json({ error: "Usuario no encontrado" });
     }
 
-    res.json(usuario);
+    let esAmigo = false;
+
+    if (solicitanteId) {
+      const amistad = await prisma.solicitudAmistad.findFirst({
+        where: {
+          estado: "ACEPTADA",
+          OR: [
+            { emisorId: solicitanteId, receptorId: usuario.id },
+            { emisorId: usuario.id, receptorId: solicitanteId },
+          ],
+        },
+      });
+      esAmigo = Boolean(amistad);
+    }
+
+    const usuarioSeguro = {
+      id: usuario.id,
+      nombre: usuario.nombre,
+      apellido: usuario.apellido,
+      avatar: usuario.avatar,
+      descripcion: usuario.descripcion,
+      fechaNacimiento: usuario.fechaNacimiento,
+      genero: usuario.genero,
+      createdAt: usuario.createdAt,
+      PerfilPrivado: usuario.PerfilPrivado,
+      EmailVisible: usuario.EmailVisible,
+      email: usuario.EmailVisible ? usuario.email : "******",
+      esAmigo,
+    };
+
+    res.json(usuarioSeguro);
   } catch (error) {
-    console.log(error);
     res.status(500).json({ error: "error al consuitar el usuario" });
   }
 });
 
+router.put("/mostrar-email", verificarToken, async (req, res) => {
+  const usuarioId = req.usuario.id;
+  const { visible } = req.body;
+
+  try {
+    const usuario = await prisma.usuario.findUnique({
+      where: { id: usuarioId },
+    });
+
+    if (!usuario) {
+      return res.status(401).json({ error: "No autorizado" });
+    }
+
+    const actualizado = await prisma.usuario.update({
+      where: { id: usuarioId },
+      data: { EmailVisible: visible },
+    });
+
+    res.json(actualizado);
+  } catch (error) {
+    res.status(500).json({ error: "error al cambiar la visibilidad del mail" });
+  }
+});
+
+router.put("/perfil-privado", verificarToken, async (req, res) => {
+  const usuarioId = req.usuario.id;
+  const { estado } = req.body;
+
+  try {
+    const usuario = await prisma.usuario.findUnique({
+      where: { id: usuarioId },
+    });
+
+    if (!usuario) {
+      return res.status(401).json({ error: "No autorizado" });
+    }
+
+    const actualizado = await prisma.usuario.update({
+      where: { id: usuarioId },
+      data: { PerfilPrivado: estado },
+    });
+
+    res.json(actualizado);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "error al cambiar privacidad de la cuenta" });
+  }
+});
+
+router.use(multerErrorHandler);
 
 export default router;

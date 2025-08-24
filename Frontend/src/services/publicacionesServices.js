@@ -3,19 +3,15 @@ import axios from "axios";
 const API_URL = import.meta.env.VITE_API_URL;
 const URL = `${API_URL}/api/publicaciones`;
 
-const obtenerFeed = async () => {
-  try {
-    const token = localStorage.getItem("token");
-    const response = await axios.get(`${URL}/feed`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    return response.data;
-  } catch (error) {
-    console.error("Error al obtener feed:", error);
-    throw error;
-  }
+const obtenerFeed = async (page = 1, limit = 20) => {
+  const token = localStorage.getItem("token");
+  const response = await axios.get(`${URL}/feed`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    params: { page, limit },
+  });
+  return response.data;
 };
 
 const crearPublicacion = async (formData) => {
@@ -92,11 +88,13 @@ const editarPublicacion = async (Id, datos) => {
   }
 };
 
+
+
 export {
   crearPublicacion,
   obtenerFeed,
   eliminarPublicacion,
   obtenerPublicacionesPorUsuario,
   obtenerPublicacionPorId,
-  editarPublicacion,
+  editarPublicacion, 
 };

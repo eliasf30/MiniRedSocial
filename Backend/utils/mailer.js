@@ -9,7 +9,7 @@ export const transporter = nodemailer.createTransport({
 });
 
 export const enviarCorreoVerificacion = async(email,token) =>{
-    const url = `http://localhost:5173/verificar-correo/${token}`;
+    const url =  `http://192.168.0.51:5173/verificar-correo/${token}`;
 
  try {
      await transporter.sendMail({

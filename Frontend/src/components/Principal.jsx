@@ -3,67 +3,52 @@ import { useAuth } from "../context/useAuth";
 import { useEffect } from "react";
 
 function Principal() {
+  const { usuario } = useAuth();
+  const navigate = useNavigate();
 
-  const {usuario} = useAuth()
-  const navigate = useNavigate()
+  useEffect(() => {
+    if (usuario) {
+      navigate("/home");
+    }
+  }, [usuario, navigate]);
 
-   useEffect(() =>{
-            if(usuario){
-            navigate("/home")
-        }
-        },[usuario,navigate])
-    
-        if (usuario) {
-        return null; 
-        }
+  if (usuario) {
+    return null;
+  }
 
   return (
     <>
       <div className="d-flex justify-content-center align-items-center  ">
-        <div className="card text-center "      style={{
-      width: "50vw",
-      maxWidth: "1200px",
-      minHeight: "400px",
-      padding: "2rem",
-     
-      boxShadow: "0 4px 12px rgba(0,0,0,0.1)"
-    }}
->
-          <div className="card-body">
+        <div
+          className="card text-center w-100 w-md-75 w-lg-50 m-3 card-body"
+          style={{
+            boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+          }}
+        >
+          <div className="p-4">
             <h2
               className="card-title mb-4 fw-bold"
               style={{ color: "#435f7a" }}
             >
               {" "}
-              Bienvenido a Mini Red Social  <i className="bi bi-chat-left-text"></i>
+              Bienvenido a Mini Red Social{" "}
+              <i className="bi bi-chat-left-text"></i>
             </h2>
-            <p
-              className="card-text "
-              style={{
-                fontSize: "1.2rem",
-                lineHeight: "1.5",
-                borderBottom: "2px solid #dee2e6",
-                paddingBottom: "8px",
-                marginBottom:"100px"
-              }}
-            >
+            <p className="card-text-principal ">
               Conectate con otras personas, comparti tu perfil y chatea en
-              tiempo real. 
+              tiempo real.
             </p>
 
-            <p className="card-text text-muted m" >
+            <p className="card-text text-muted m">
               Registrate o inicia sesion para empezar
             </p>
             <div className="container d-flex justify-content-evenly mt-5 ">
-              <NavLink to="/Login"
-                className="btn btn-primary submitbutton"
-                
-              >
+              <NavLink to="/Login" className=" btn btn-primary submitbutton ">
                 Iniciar sesion
               </NavLink>
-              <NavLink to="/Register"
-                className="btn btn-secondary submitbutton"
-                
+              <NavLink
+                to="/Register"
+                className="btn btn-secondary submitbutton "
               >
                 Registrarse
               </NavLink>

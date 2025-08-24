@@ -13,7 +13,8 @@ import { toast } from "react-toastify";
 function SolicitudesPendientes() {
   const [solicitudes, setSolicitudes] = useState([]);
   const [loading, setLoading] = useState(false);
-
+  const URL = import.meta.env.VITE_API_URL;
+  const {darkMode} = useAuth()
 
   const navigate = useNavigate();
 
@@ -64,8 +65,9 @@ function SolicitudesPendientes() {
 
   return (
     <div
-      className="contenedor-principal"
-      style={{ width: "40vw", position: "relative" }}
+      className="contenedor-principal contenedor-amigos"
+      style={{ position: "relative" }}
+      
     >
       <h3 className="mb-1 mt-5 text-muted">Solicitudes de amistad:</h3>
       <button
@@ -82,13 +84,15 @@ function SolicitudesPendientes() {
           {solicitudes.map((solicitud) => (
             <div
               key={solicitud.id}
-              className="card  m-2 mt-4 p-3 shadow-sm w-100"
+              className={`card m-2 mt-4 p-3 shadow-sm w-100 ${
+                  darkMode ? "dark-style border-secondary" : ""
+                }`}
             >
               <div className="d-flex align-items-center">
                 <img
                   src={
                     solicitud.emisor.avatar
-                      ? `http://localhost:5000${solicitud.emisor.avatar}`
+                      ? `${URL}${solicitud.emisor.avatar}`
                       : preview
                   }
                   alt="Foto de perfil"
@@ -111,7 +115,9 @@ function SolicitudesPendientes() {
               </div>
               <div className="mt-3 d-flex justify-content-between">
                 <button
-                  className="btn btn-outline-primary btn-sm"
+                 className={`btn btn-sm ${
+                      darkMode ? "btn-outline-darkmode" : "btn-outline-primary"
+                    }`}
                   onClick={() => navigate(`/usuarios/${solicitud.emisor.id}`)}
                 >
                   Ver perfil

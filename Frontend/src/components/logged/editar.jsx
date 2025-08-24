@@ -125,118 +125,94 @@ const fechaNacimientoInput = usuario?.fechaNacimiento
 
   return (
     <>
-      <div className="container d-flex align-items-start justify-content-start">
+      <div className="container my-4 d-flex justify-content-center">
+  <div className="card shadow-lg p-4 profilewidth" style={{marginBottom:"100px"}} >
+    <form onSubmit={handleSubmit(onSubmit)}>
+      {/* Avatar y descripción */}
+      <div className="d-flex flex-column flex-md-row align-items-center mb-4">
         <div
-          className="card shadow-lg p-5 pt-4 d-flex  "
-          style={{ width: "80vw" }}
+          onClick={handleClick}
+          className="me-md-4 mb-3 mb-md-0 avatar-wrapper"
+          style={{ cursor: "pointer", position: "relative" }}
         >
-          <form onSubmit={handleSubmit(onSubmit)}>
-            <div
-              className="d-flex align-items-center m-3"
-              style={{ width: "100%" }}
-            >
-              <div
-                onClick={handleClick}
-                className="card shadow-lg  me-4"
-                style={{ borderRadius: "50%" }}
-              >
-                <div className="avatar-wrapper">
-                  {image && (
-                    <img
-                      src={image.startsWith("data:") ? image : `${URL}/${image.replace(/^\/+/, "")}`}
-                      alt="Avatar"
-                      className="editarImage"
-                      draggable={false}
-                    />
-                  )}
-                  <div className="avatar-overlay">
-                    <i className="bi bi-pencil"></i>
-                  </div>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    style={{ display: "none" }}
-                    ref={fileInputRef}
-                      onChange={(e) => {
-                      handleImageChange(e);
-                      setSelectedFile(e.target.files[0]); }}
-                  />
-                </div>
-              </div>
-              <div
-                className="textColor ms-4 position-relative"
-                style={{ width: "70%" }}
-              >
-                <h3 className="textColor mb-2  border-bottom border-2 d-inline-block pb-1">
-                  {`${usuario.nombre} ${usuario.apellido}`}{" "}
-                </h3>
+          <img
+            src={image.startsWith("data:") ? image : `${URL}/${image.replace(/^\/+/, "")}`}
+            alt="Avatar"
+            className="rounded-circle"
+            style={{ width: "120px", height: "120px", objectFit: "cover" }}
+          />
+          <div className="avatar-overlay d-flex justify-content-center align-items-center">
+            <i className="bi bi-pencil"></i>
+          </div>
+          <input
+            type="file"
+            accept="image/*"
+            ref={fileInputRef}
+            style={{ display: "none" }}
+            onChange={handleImageChange}
+          />
+        </div>
 
-                <textarea
-                  {...register("descripcion")}
-                  type="w-100"
-                  defaultValue={usuario.descripcion}
-                  rows={3}
-                  className="form-control"
-                  style={{ width: "100%", resize: "none" }}
-                  maxLength={200}
-                />
-                <p className="contador-caracteres">
-                  {" "}
-                  {watch("descripcion")?.length || 0}/200{" "}
-                </p>
-              </div>
-            </div>
-            <hr />
-            <div className="d-flex col">
-              <div style={{ width: "50%" }}>
-                <h5 className="mb-3">Datos personales</h5>
-                <div style={{ height: "20vh" }}>
-                  <p>📫Email:</p>
-                  <p className="text-muted">{usuario.email}</p>
-                  <p>🕓Miembro desde:</p>
-                  <p className="text-muted">
-                    {" "}
-                    {new Date(usuario.createdAt).toLocaleDateString()}
-                  </p>
-                </div>
-              </div>
-              <div>
-                <h5 className="text-muted mb-3">Opcional</h5>
-                <div className=" d-flex row">
-                  <p>📅Fecha de Nacimiento:</p>
-                  <input
-                    {...register("fechaNacimiento")}
-                    className="form-control mb-2 ms-2 "
-                    type="date"
-                    defaultValue={fechaNacimientoInput}
-                  />
-                  <p>🧑Genero:</p>
-                  <select
-                    {...register("genero")}
-                    className="form-control mb-2 ms-2 "
-                    defaultValue={usuario?.genero}
-                  >
-                    <option value="" disabled>
-                      Elegí una opción
-                    </option>
-                    <option>Hombre</option>
-                    <option>Mujer</option>
-                    <option>Otro</option>
-                    <option>Prefiero no decirlo</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-            <div className="d-flex justify-content-center mt-3">
-              <NavLink to="/perfil" className="btn btn-danger me-3">
-                {" "}
-                Cancelar
-              </NavLink>
-              <button className="btn btn-primary">Confirmar</button>
-            </div>
-          </form>
+        <div className="flex-grow-1 w-100">
+          <h3 className="mb-2 border-bottom border-2 d-inline-block pb-1">
+            {usuario.nombre} {usuario.apellido}
+          </h3>
+          <textarea
+            {...register("descripcion")}
+            className="form-control mt-2"
+            rows={3}
+            defaultValue={usuario.descripcion}
+            style={{ resize: "none" }}
+            maxLength={200}
+          />
+          <p className="text-end text-muted">{watch("descripcion")?.length || 0}/200</p>
         </div>
       </div>
+
+      <hr />
+
+      {/* Datos personales y Opcional */}
+      <div className="row mt-3">
+        <div className="col-12 col-lg-6 mb-3">
+          <h5 className="mb-3">Datos personales</h5>
+          <p>📫 Email:</p>
+          <p className="text-muted">{usuario.email}</p>
+          <p>🕓 Miembro desde:</p>
+          <p className="text-muted">{new Date(usuario.createdAt).toLocaleDateString()}</p>
+        </div>
+
+        <div className="col-12 col-lg-6 mb-3">
+          <h5 className="mb-3">Opcional</h5>
+          <p>📅 Fecha de Nacimiento:</p>
+          <input
+            {...register("fechaNacimiento")}
+            className="form-control mb-2"
+            type="date"
+            defaultValue={fechaNacimientoInput}
+          />
+          <p>🧑 Género:</p>
+          <select
+            {...register("genero")}
+            className="form-control mb-2"
+            defaultValue={usuario?.genero || ""}
+          >
+            <option value="" disabled>Elegí una opción</option>
+            <option>Hombre</option>
+            <option>Mujer</option>
+            <option>Otro</option>
+            <option>Prefiero no decirlo</option>
+          </select>
+        </div>
+      </div>
+
+      {/* Botones */}
+      <div className="d-flex justify-content-center mt-3 gap-3">
+        <NavLink to="/perfil" className="btn btn-danger">Cancelar</NavLink>
+        <button type="submit" className="btn btn-primary">Confirmar</button>
+      </div>
+    </form>
+  </div>
+</div>
     </>
   );
 }

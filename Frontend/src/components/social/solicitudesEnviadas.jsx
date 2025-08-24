@@ -2,16 +2,22 @@ import { useNavigate } from "react-router";
 import { useState, useEffect } from "react";
 import formatearNombre from "../../utils/formatearNombre";
 import preview from "../../images/preview.png";
-import { cancelarSolicitud, obtenerSolicitudesEnviadas } from "../../services/amistadServices";
-import "../../App.css"
+import {
+  cancelarSolicitud,
+  obtenerSolicitudesEnviadas,
+} from "../../services/amistadServices";
+import "../../App.css";
+import { useAuth } from "../../context/useAuth";
 
 function SolicitudesEnviadas() {
   const navigate = useNavigate();
 
   const [solicitudes, setSolicitudes] = useState([]);
   const [loading, setLoading] = useState(false);
+  const URL = import.meta.env.VITE_API_URL;
+  const { darkMode } = useAuth();
 
-   const manejarCancelar = async (solicitudId) => {
+  const manejarCancelar = async (solicitudId) => {
     await cancelarSolicitud(solicitudId);
     setSolicitudes(solicitudes.filter((s) => s.id !== solicitudId));
   };
@@ -31,9 +37,7 @@ function SolicitudesEnviadas() {
             avatar: null,
           },
         }));
-       // setSolicitudes([...resultado, ...falsas]);
-
-
+        // setSolicitudes([...resultado, ...falsas]);
 
         setSolicitudes(resultado);
       } catch (error) {
@@ -48,8 +52,8 @@ function SolicitudesEnviadas() {
   return (
     <>
       <div
-        className="contenedor-principal"
-        style={{ width: "40vw", position: "relative" }}
+        className="contenedor-principal contenedor-amigos"
+        style={{ position: "relative" }}
       >
         <h3 className="mb-1 mt-5 text-muted">Solicitudes Enviadas:</h3>
         <button
@@ -67,19 +71,18 @@ function SolicitudesEnviadas() {
           </p>
         ) : (
           <div className="col mt-2 w-100">
-           
             {solicitudes.map((solicitud) => (
               <div
                 key={solicitud.id}
-                className="card m-2 mt-4 p-3 shadow-sm w-100"
-                
-                
+                className={`card m-2 mt-4 p-3 shadow-sm w-100 ${
+                  darkMode ? "dark-style border-secondary" : ""
+                }`}
               >
                 <div className="d-flex align-items-center">
                   <img
                     src={
                       solicitud.receptor.avatar
-                        ? `http://localhost:5000${solicitud.receptor.avatar}`
+                        ? `${URL}${solicitud.receptor.avatar}`
                         : preview
                     }
                     alt="Foto de perfil"
@@ -106,13 +109,16 @@ function SolicitudesEnviadas() {
                 </div>
                 <div className="mt-3 d-flex justify-content-between">
                   <button
-                    className="btn btn-outline-primary btn-sm"
-                    onClick={() => navigate(`/usuarios/${solicitud.receptor.id}`)}
+                    className={`btn btn-sm ${
+                      darkMode ? "btn-outline-darkmode" : "btn-outline-primary"
+                    }`}
+                    onClick={() =>
+                      navigate(`/usuarios/${solicitud.receptor.id}`)
+                    }
                   >
                     Ver perfil
                   </button>
                   <div>
-                    
                     <button
                       className="btn btn-danger btn-sm"
                       onClick={() => manejarCancelar(solicitud.id)}

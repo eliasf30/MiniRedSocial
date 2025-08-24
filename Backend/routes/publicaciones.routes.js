@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { verificarToken } from "../middlewares/authMiddleware.js";
 import { PrismaClient } from "@prisma/client";
-import {  cloudinary, storage } from "../utils/Cloudinary.js";
+import { cloudinary, storage } from "../utils/Cloudinary.js";
 import multer from "multer";
 const prisma = new PrismaClient();
 
@@ -9,10 +9,14 @@ const router = Router();
 const upload = multer({ storage });
 
 router.post("/", verificarToken, upload.single("imagen"), async (req, res) => {
+  
   try {
     const { contenido } = req.body;
     const imagenUrl = req.file?.path || null;
     const autorId = req.usuario.id;
+
+   
+
 
     if (!contenido && !imagenUrl) {
       return res
@@ -24,15 +28,25 @@ router.post("/", verificarToken, upload.single("imagen"), async (req, res) => {
       return res.status(401).json({ message: "No autorizado" });
     }
 
-    const nuevoPost = await prisma.Post.create({
+
+     const usuario = await prisma.usuario.findUnique({
+    where: { id: autorId },
+  });
+
+  if (!usuario.isVerified) {
+    return res.status(403).json({
+      message: "Debes verificar tu email antes de crear publicaciones.",
+    });
+  }
+    
+
+    const nuevoPost = await prisma.post.create({
       data: {
         autorId,
         contenido,
         imagenUrl,
       },
     });
-
-
 
     res.status(201).json({ message: "Publicacion Creada con exito" });
   } catch (error) {
@@ -46,7 +60,6 @@ router.post("/", verificarToken, upload.single("imagen"), async (req, res) => {
 
 
 
-
 router.get("/feed", verificarToken, async (req, res) => {
   try {
     const usuarioId = req.usuario.id;
@@ -54,6 +67,11 @@ router.get("/feed", verificarToken, async (req, res) => {
     if (!usuarioId) {
       return res.status(401).json({ message: "No autorizado" });
     }
+
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 20;
+
+    const skip = (page - 1) * limit;
 
     const SolicitudesAceptadas = await prisma.solicitudAmistad.findMany({
       where: {
@@ -93,6 +111,8 @@ router.get("/feed", verificarToken, async (req, res) => {
       orderBy: {
         createdAt: "desc",
       },
+      skip,
+      take: limit,
     });
 
     res.status(200).json(publicaciones);
@@ -136,14 +156,14 @@ router.get("/usuario/:usuarioId", async (req, res) => {
   }
 });
 
-router.get("/:publicacionId", verificarToken, async(req,res) =>{
-    const publicacionId = parseInt(req.params.publicacionId); 
-    const usuarioId = req.usuario.id;
+router.get("/:publicacionId", verificarToken, async (req, res) => {
+  const publicacionId = parseInt(req.params.publicacionId);
+  const usuarioId = req.usuario.id;
 
-    try {
-        const publicacion = await prisma.post.findUnique({
-            where: {id: publicacionId},
-            include: {
+  try {
+    const publicacion = await prisma.post.findUnique({
+      where: { id: publicacionId },
+      include: {
         autor: {
           select: {
             id: true,
@@ -153,20 +173,19 @@ router.get("/:publicacionId", verificarToken, async(req,res) =>{
           },
         },
       },
-        })
+    });
 
-        if(!publicacion){
-            return res.status(404).json({error: "Publicacion no encontrada"})
-        }
-        if(usuarioId !== publicacion.autorId){
-            return res.status(403).json({error: "No autorizado "})
-        }
-        res.json(publicacion)
-    } catch (error) {
-        res.status(500).json({error: "Error al obtener la publicacion"})
+    if (!publicacion) {
+      return res.status(404).json({ error: "Publicacion no encontrada" });
     }
-
-})
+    if (usuarioId !== publicacion.autorId) {
+      return res.status(403).json({ error: "No autorizado " });
+    }
+    res.json(publicacion);
+  } catch (error) {
+    res.status(500).json({ error: "Error al obtener la publicacion" });
+  }
+});
 
 router.delete("/:publicacionId", verificarToken, async (req, res) => {
   const usuarioId = req.usuario.id;
@@ -196,55 +215,69 @@ router.delete("/:publicacionId", verificarToken, async (req, res) => {
   }
 });
 
-router.put("/:id", verificarToken, upload.single("imagen"),async(req,res) =>{
+router.put(
+  "/:id",
+  verificarToken,
+  upload.single("imagen"),
+  async (req, res) => {
     try {
-        const publicacionId = parseInt(req.params.id);
-        const usuarioId = req.usuario.id
+      const publicacionId = parseInt(req.params.id);
+      const usuarioId = req.usuario.id;
 
-        const publicacion = await prisma.post.findUnique({
-            where: {id: publicacionId}
-        })
-
-        if(!publicacion){
-            return res.status(404).json({error: "Publicacion no encontrada"})
-        }
-
-        if(publicacion.autorId !== usuarioId){
-            return res.status(403).json({error: "No autorizado para modificar esta publicacion"})
-        }
-
-        const {contenido} = req.body;
-        let imagenUrl = publicacion.imagenUrl;
-
-
-        if (req.file) {
-      const resultado = await cloudinary.uploader.upload(req.file.path, {
-        folder: "red-social", 
+      const publicacion = await prisma.post.findUnique({
+        where: { id: publicacionId },
       });
-      imagenUrl = resultado.secure_url;
-    }
 
-          if (!contenido && !imagenUrl) {
-      return res.status(400).json({ message: "El post debe tener contenido o imagen" });
-    }
+      if (!publicacion) {
+        return res.status(404).json({ error: "Publicacion no encontrada" });
+      }
 
-        const publcacionActualizada = await prisma.post.update({
-            where: {id: publicacionId},
-            data:{
-                contenido, 
-                imagenUrl,
-            },
+      if (publicacion.autorId !== usuarioId) {
+        return res
+          .status(403)
+          .json({ error: "No autorizado para modificar esta publicacion" });
+      }
+
+      const { contenido } = req.body;
+      let imagenUrl = publicacion.imagenUrl;
+
+      if (req.file) {
+        const resultado = await cloudinary.uploader.upload(req.file.path, {
+          folder: "red-social",
         });
+        imagenUrl = resultado.secure_url;
+      }
 
-        res.status(200).json({ message: "Publicacion modificada con exito", publicacion: publcacionActualizada });
+      if (!contenido && !imagenUrl) {
+        return res
+          .status(400)
+          .json({ message: "El post debe tener contenido o imagen" });
+      }
 
+      const publcacionActualizada = await prisma.post.update({
+        where: { id: publicacionId },
+        data: {
+          contenido,
+          imagenUrl,
+        },
+      });
+
+      res
+        .status(200)
+        .json({
+          message: "Publicacion modificada con exito",
+          publicacion: publcacionActualizada,
+        });
     } catch (error) {
-        
-        console.error("Error al modificar la publicación:", error);
-        res.status(500).json({ error: "Error al modificar la publicación" });
-        
+      console.error("Error al modificar la publicación:", error);
+      res.status(500).json({ error: "Error al modificar la publicación" });
     }
-})
+  }
+);
+
+
+
+
 
 
 export default router;
