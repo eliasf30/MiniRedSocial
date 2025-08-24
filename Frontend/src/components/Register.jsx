@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router";
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
-import "../app.css";
+import "../App.css";
 import { useAuth } from "../context/useAuth";
 import defaultpreview from "../images/preview.png";
 import { useGoogleReCaptcha } from "react-google-recaptcha-v3";

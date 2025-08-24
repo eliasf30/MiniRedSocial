@@ -1,6 +1,6 @@
 import { NavLink, useNavigate } from "react-router";
 import { useAuth } from "../../context/useAuth";
-import "../../app.css";
+import "../../App.css";
 import BarraDeBusqueda from "./barraDeBusqueda";
 import { useEffect, useRef, useState } from "react";
 import { Dropdown } from "bootstrap";

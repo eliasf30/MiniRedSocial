@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { BrowserRouter, NavLink, Route, Routes } from "react-router";
 
-import "./app.css"
+import "./App.css"
 import Principal from "./components/Principal";
 import Descripcion from "./components/Descripcion";
 import Login from "./components/Login";
