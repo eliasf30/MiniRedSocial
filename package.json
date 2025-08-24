@@ -1,0 +1,13 @@
+{
+  "name": "MiniRedSocial",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "cd Frontend && npm install && npm run build",
+    "start": "cd Backend && npm install && node index.js",
+    "dev": "concurrently \"cd Backend && nodemon index.js\" \"cd Frontend && npm run dev\""
+  },
+  "dependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

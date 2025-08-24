@@ -1,4 +1,5 @@
 import express from "express";
+import { fileURLToPath } from 'url';
 import cors from "cors";
 import dotenv from "dotenv";
 import path from "path";
@@ -13,6 +14,10 @@ import { verificarSocket } from "./middlewares/authIo.js";
 import { Server } from "socket.io";
 import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
+
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 dotenv.config();
 
@@ -92,6 +97,16 @@ io.on("connection", (socket) => {
     
   });
 });
+
+
+
+app.use(express.static(path.join(__dirname, '../Frontend/dist')));
+
+
+app.use((req, res) => {
+  res.sendFile(path.join(__dirname, '../Frontend/dist/index.html'));
+});
+
 
 server.listen(PORT, () => {
   console.log(`servidor corriendo en el puerto ${PORT}`);
