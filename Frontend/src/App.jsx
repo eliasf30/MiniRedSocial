@@ -6,7 +6,7 @@ import Principal from "./components/Principal";
 import Descripcion from "./components/Descripcion";
 import Login from "./components/Login";
 import Register from "./components/Register";
-import Home from "./components/logged/home";
+import Home from "./components/logged/Home";
 import  NavbarPublica  from "./components/navbarPublica";
 import NavbarPrivada from "./components/logged/navbarPrivada";
 import Footer from "./components/logged/footer";
