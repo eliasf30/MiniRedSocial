@@ -4,7 +4,7 @@ import { useNavigate } from "react-router";
 import { useAuth } from "../context/useAuth";
 import { loginUsuario } from "../services/userServices";
 
-import "../app.css";
+import "../App.css";
 
 function Login() {
   const [showPassword, setShowPassword] = useState(false);
