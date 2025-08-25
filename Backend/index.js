@@ -21,6 +21,10 @@ const __dirname = path.dirname(__filename);
 
 dotenv.config();
 
+console.log("PORT:", process.env.PORT || "No definido");
+console.log("DATABASE_URL:", process.env.DATABASE_URL ? "OK" : "No definido");
+console.log("JWT_SECRET:", process.env.JWT_SECRET ? "OK" : "No definido");
+
 const app = express();
 
 const server = http.createServer(app);
