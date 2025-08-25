@@ -47,7 +47,7 @@ app.use("/api/chat", chatRoutes);
 app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 app.use("/avatars", express.static(path.join(process.cwd(), "avatars")));
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT;
 
 
 
