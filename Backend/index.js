@@ -31,8 +31,13 @@ const server = http.createServer(app);
 
 const io = new Server(server, {
   cors: {
-    origin: "*",
-    methods: ["GET", "POST"],
+     origin: [
+    "http://localhost:5173",     // vite en local
+    "http://192.168.0.51:5000", // tu IP en local
+    "https://miniredsocial-production.up.railway.app" // producción
+  ],
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true
   },
 });
 
@@ -46,8 +51,6 @@ app.use("/api/publicaciones", publicacionesRouter);
 app.use("/api/chat", chatRoutes);
 app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 app.use("/avatars", express.static(path.join(process.cwd(), "avatars")));
-
-const PORT = process.env.PORT;
 
 
 
@@ -110,6 +113,10 @@ app.use(express.static(path.join(__dirname, '../Frontend/dist')));
 app.use((req, res) => {
   res.sendFile(path.join(__dirname, '../Frontend/dist/index.html'));
 });
+
+
+
+const PORT = process.env.PORT || 5000;
 
 
 server.listen(PORT, () => {

@@ -5,7 +5,7 @@ const prisma = new PrismaClient();
 
 const crearBot = async () => {
   try {
-    const hashedPassword = await bcrypt.hash("aaaaaa", 10);
+    const hashedPassword = await bcrypt.hash("admin9989", 10);
 
     const usuarioExistente = await prisma.usuario.findUnique({
       where: { email: "bot@test.com" },
@@ -18,6 +18,7 @@ const crearBot = async () => {
 
     const nuevoBot = await prisma.usuario.create({
       data: {
+        id: 2,
         nombre: "Bot",
         apellido: "de Prueba",
         email: "bot@test.com",
