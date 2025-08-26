@@ -31,11 +31,7 @@ const server = http.createServer(app);
 
 const io = new Server(server, {
   cors: {
-     origin: [
-    "http://localhost:5173",     // vite en local
-    "http://192.168.0.51:5000", // tu IP en local
-    "https://miniredsocial-production.up.railway.app" // producción
-  ],
+     origin: "*",
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true
   },
