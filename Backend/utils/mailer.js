@@ -11,23 +11,21 @@ export const transporter = nodemailer.createTransport({
 export const enviarCorreoVerificacion = async(email,token) =>{
    const url = `${process.env.FRONTEND_URL}/verificar-correo/${token}`;
 
- try {
-     await transporter.sendMail({
+try {
+    await transporter.sendMail({
         from: `"MiniRedSocial" <${process.env.MAIL_USER}>`,
         to: email,
-        subject: "verifica  tu correo",
-        html: `
-            <h2>¡Bienvenido!</h2>
-            <p> Hace click en el siguiente enlace para verificar tu cuenta </p>
-            <a href="${url}">${url}</a>
-        
-        `
-        
+        subject: "Verifica tu correo",
+        html: `<h2>¡Bienvenido!</h2>
+               <p>Hace click en el siguiente enlace para verificar tu cuenta</p>
+               <a href="${url}">${url}</a>`
     });
- } catch (error) {
-     console.error("Error enviando correo:", error);
+    console.log(`Correo enviado a ${email}`);
+} catch (error) {
+    console.error("Error enviando correo:", error?.response || error);
     throw error;
- }
+}
    
 
 };
+
