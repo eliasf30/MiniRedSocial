@@ -123,7 +123,7 @@ function NavbarPrivada() {
                 style={{ minWidth: "180px" }}
               >
                 <img
-                 src={usuario.avatar ? `${URL}${usuario.avatar}` : preview}
+                  src={usuario.avatar?.startsWith("http") ? usuario.avatar : `${URL}${usuario.avatar}`} 
                   className="navbar-avatar"
                   alt="Avatar"
                   draggable="false"
