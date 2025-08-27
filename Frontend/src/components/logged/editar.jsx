@@ -97,8 +97,8 @@ function EditarPerfil() {
     }
   };
 
-  const fechaNacimientoInput = usuario?.fechaNacimiento
-  ? ajustarFechaSinZona(usuario.fechaNacimiento)?.toISOString().split("T")[0] || ""
+const fechaNacimientoInput = usuario?.fechaNacimiento
+  ? ajustarFechaSinZona(usuario.fechaNacimiento)?.toISOString().split("T")[0]
   : "";
 
   const hayCambios = () => {
@@ -106,12 +106,13 @@ function EditarPerfil() {
     const fechaNacimiento = watch("fechaNacimiento");
     const genero = watch("genero");
 
+    const fechaUsuario = usuario?.fechaNacimiento
+  ? ajustarFechaSinZona(usuario.fechaNacimiento).toISOString().split("T")[0]
+  : "";
+
     return (
       descripcion !== usuario.descripcion ||
-      fechaNacimiento !==
-        ajustarFechaSinZona(usuario.fechaNacimiento)
-          .toISOString()
-          .split("T")[0] ||
+      fechaNacimiento !== fechaUsuario ||
       genero !== usuario.genero ||
       selectedFile !== null
     );
