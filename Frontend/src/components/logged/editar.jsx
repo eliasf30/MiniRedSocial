@@ -98,12 +98,8 @@ function EditarPerfil() {
   };
 
   const fechaNacimientoInput = usuario?.fechaNacimiento
-    ? (() => {
-        const fecha = ajustarFechaSinZona(usuario.fechaNacimiento);
-        fecha.setDate(fecha.getDate());
-        return fecha.toISOString().split("T")[0];
-      })()
-    : "";
+  ? ajustarFechaSinZona(usuario.fechaNacimiento)?.toISOString().split("T")[0] || ""
+  : "";
 
   const hayCambios = () => {
     const descripcion = watch("descripcion");
