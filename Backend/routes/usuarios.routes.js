@@ -10,19 +10,18 @@ import { enviarCorreoVerificacion } from "../utils/mailer.js";
 import crypto from "crypto";
 import axios from "axios";
 import { multerErrorHandler } from "../middlewares/multerErrorHandler.js"
+import { v2 as cloudinary } from "cloudinary";
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
+
 const router = Router();
 const prisma = new PrismaClient();
 
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, "uploads/");
-  },
-  filename: function (req, file, cb) {
-    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    const ext = path.extname(file.originalname);
-    cb(null, file.fieldname + "-" + uniqueSuffix + ext);
-  },
-});
 
 const fileFilter = (req, file, cb) => {
   const allowedTypes = /jpeg|jpg|png/;
@@ -36,11 +35,15 @@ const fileFilter = (req, file, cb) => {
   }
 };
 
+
+const storage = multer.memoryStorage(); 
 const upload = multer({
-  storage: storage,
+  storage,
   limits: { fileSize: 5 * 1024 * 1024 },
-  fileFilter: fileFilter,
+  fileFilter,
 });
+
+
 
 router.post("/register", upload.single("avatar"), async (req, res) => {
   const { nombre, apellido, email, password, descripcion, captcha } = req.body;
@@ -49,9 +52,27 @@ router.post("/register", upload.single("avatar"), async (req, res) => {
     return res.status(400).json({ error: "Captcha faltante" });
   }
 
-  const avatarPath = req.file
-    ? `/uploads/${path.basename(req.file.path)}`
-    : `/avatars/default-avatar.jpg`;
+ let avatarUrl = "/avatars/default-avatar.jpg"; // por defecto
+
+if (req.file) {
+  try {
+    const result = await new Promise((resolve, reject) => {
+  const stream = cloudinary.uploader.upload_stream(
+    { folder: "avatars", transformation: [{ width: 300, height: 300, crop: "fill" }] },
+    (error, result) => {
+      if (error) reject(error);
+      else resolve(result);
+    }
+  );
+  stream.end(req.file.buffer);
+});
+avatarUrl = result.secure_url;
+  } catch (error) {
+    console.error("Error subiendo a Cloudinary:", error);
+    return res.status(500).json({ error: "Error al subir avatar" });
+  }
+}
+
   try {
     const response = await axios.post(
       `https://www.google.com/recaptcha/api/siteverify?secret=${process.env.RECAPTCHA_SECRET_KEY}&response=${captcha}`
@@ -59,7 +80,7 @@ router.post("/register", upload.single("avatar"), async (req, res) => {
 
     const data = response.data;
 
-    if (!data.success ||  data.score < 0.5) {
+    if (   data.score < 0.5) {
       return res.status(400).json({ error: "Captcha inválido o sospechoso" });
     }
 
@@ -101,7 +122,7 @@ router.post("/register", upload.single("avatar"), async (req, res) => {
         email,
         password: hashedPassword,
         descripcion,
-        avatar: avatarPath,
+        avatar: avatarUrl,
       },
     });
 
@@ -322,17 +343,29 @@ router.get("/buscar", async (req, res) => {
   res.json(usuarios);
 });
 
-router.post(
-  "/perfil/editar",
-  verificarToken,
-  upload.single("avatar"),
-  async (req, res) => {
+router.post("/perfil/editar",verificarToken,upload.single("avatar"),async (req, res) => {
     const { genero, fechaNacimiento, descripcion } = req.body;
 
-    const avatarPath = req.file
-      ? `/uploads/${path.basename(req.file.path)}`
-      : null;
+    let avatarUrl;
 
+if (req.file) {
+  try {
+    const result = await new Promise((resolve, reject) => {
+  const stream = cloudinary.uploader.upload_stream(
+    { folder: "avatars", transformation: [{ width: 300, height: 300, crop: "fill" }] },
+    (error, result) => {
+      if (error) reject(error);
+      else resolve(result);
+    }
+  );
+  stream.end(req.file.buffer);
+});
+avatarUrl = result.secure_url;
+  } catch (error) {
+    console.error("Error subiendo a Cloudinary:", error);
+    return res.status(500).json({ error: "Error al subir avatar" });
+  }
+}
     try {
       const usuarioActualizado = await prisma.usuario.update({
         where: { id: req.usuario.id },
@@ -342,7 +375,7 @@ router.post(
             ? new Date(fechaNacimiento)
             : undefined,
           descripcion,
-          ...(avatarPath && { avatar: avatarPath }),
+          ...(avatarUrl && { avatar: avatarUrl }),
         },
       });
       res.json({

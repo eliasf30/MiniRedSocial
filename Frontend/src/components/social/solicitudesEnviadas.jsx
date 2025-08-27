@@ -82,7 +82,7 @@ function SolicitudesEnviadas() {
                   <img
                     src={
                       solicitud.receptor.avatar
-                        ? `${URL}${solicitud.receptor.avatar}`
+                        ? `${solicitud.receptor.avatar}`
                         : preview
                     }
                     alt="Foto de perfil"

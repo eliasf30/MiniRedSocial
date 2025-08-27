@@ -92,7 +92,7 @@ function SolicitudesPendientes() {
                 <img
                   src={
                     solicitud.emisor.avatar
-                      ? `${URL}${solicitud.emisor.avatar}`
+                      ? `${solicitud.emisor.avatar}`
                       : preview
                   }
                   alt="Foto de perfil"

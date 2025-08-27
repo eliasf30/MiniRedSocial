@@ -170,6 +170,7 @@ function NavbarPrivada() {
             <ul
               className="dropdown-menu w-100 mt-1"
               aria-labelledby="dropdownMenuButton"
+              style={{zIndex:9999}}
             >
               <li className=" solo-mobile">
                 <NavLink className="dropdown-item " to="/home">

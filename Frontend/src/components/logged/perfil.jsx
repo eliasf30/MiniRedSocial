@@ -84,7 +84,8 @@ function Perfil() {
             <img
              
 
-              src={usuario.avatar? `${URL}${usuario.avatar}` : preview}
+              src={usuario.avatar?.startsWith("http") ? usuario.avatar : `${URL}${usuario.avatar}`} 
+
               alt="Avatar"
               className="rounded-circle"
               style={{ width: "120px", height: "120px", objectFit: "cover" }}

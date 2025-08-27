@@ -60,7 +60,7 @@ function BarraDeBusqueda() {
                 >
                   <img
                     draggable="false"
-                    src={user.avatar ? `${URL}${user.avatar}` : preview}
+                    src={user.avatar ? `${user.avatar}` : preview}
                     alt={`${user.nombre} ${user.apellido}`}
                     className="avatar-usuario"
                   />

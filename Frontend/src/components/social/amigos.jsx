@@ -106,7 +106,7 @@ function Amigos() {
               >
                 <div className="d-flex align-items-center">
                   <img
-                    src={amigo.avatar ? `${URL}${amigo.avatar}` : preview}
+                    src={amigo.avatar ? `${amigo.avatar}` : preview}
                     alt="Foto de perfil"
                     className="rounded-circle me-3"
                     style={{

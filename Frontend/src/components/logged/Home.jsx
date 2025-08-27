@@ -126,7 +126,7 @@ function Home() {
 
           <div className="d-flex align-items-start gap-3 w-100">
             <img
-              src={post.autor.avatar ? `${URL}${post.autor.avatar}` : preview}
+              src={post.autor.avatar ? `${post.autor.avatar}` : preview}
               alt="Avatar"
               draggable="false"
               className="rounded-circle flex-shrink-0"

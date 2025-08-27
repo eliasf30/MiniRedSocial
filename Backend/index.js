@@ -45,7 +45,7 @@ app.use("/api/usuarios", usuariosRoutes);
 app.use("/api/amigos", amigosRoutes);
 app.use("/api/publicaciones", publicacionesRouter);
 app.use("/api/chat", chatRoutes);
-app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
+
 app.use("/avatars", express.static(path.join(process.cwd(), "avatars")));
 
 
