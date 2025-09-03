@@ -136,7 +136,7 @@ function EditarPublicacion({ onModificar }) {
           <div className="d-flex align-items-start gap-3 w-100">
             <img
               src={
-                post.autor.avatar ? `${API_URL}${post.autor.avatar}` : preview
+                post.autor.avatar ? `${post.autor.avatar}` : preview
               }
               alt="Avatar"
               draggable="false"

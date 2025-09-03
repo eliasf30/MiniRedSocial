@@ -90,7 +90,7 @@ function PerfilPublico() {
         <div className="row align-items-center mb-3 position-relative">
           <div className="col-12 col-md-auto text-center mb-3 mb-md-0">
             <img
-              src={`${URL}${user.avatar}`}
+              src={`${user.avatar}`}
               alt="Avatar"
               className="rounded-circle"
               style={{ width: "120px", height: "120px", objectFit: "cover" }}
@@ -155,7 +155,7 @@ function PerfilPublico() {
                 <div className="d-flex  align-items-start gap-3 w-100">
                   <img
                     src={
-                      post.autor.avatar ? `${URL}${post.autor.avatar}` : preview
+                      post.autor.avatar ? `${post.autor.avatar}` : preview
                     }
                     alt="Avatar"
                     draggable={false}

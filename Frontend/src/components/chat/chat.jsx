@@ -245,7 +245,7 @@ function Chat() {
                   }}
                 >
                   <img
-                    src={chat.avatar ? `${URL}${chat.avatar}` : preview}
+                    src={chat.avatar ? `${chat.avatar}` : preview}
                     alt={chat.nombre}
                     width={55}
                     height={55}

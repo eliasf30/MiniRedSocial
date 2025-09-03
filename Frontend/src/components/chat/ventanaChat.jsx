@@ -251,7 +251,7 @@ function VentanaChat({
           style={{ flexShrink: 0, cursor: "pointer" }}
         >
           <img
-            src={chat.avatar ? `${API_URL}${chat.avatar}` : preview}
+            src={chat.avatar ? `${chat.avatar}` : preview}
             alt={chat.nombre}
             width={40}
             height={40}
