@@ -48,7 +48,7 @@ router.get("/lista", verificarToken, async (req, res) => {
           id: amigo.id,
           nombre: amigo.nombre,
           apellido: amigo.apellido,
-          avatar: amigo.avatar,
+          avatar: amigo.avatar || "/avatars/default-avatar.jpg",
           ultimoMensaje: ultimoMensaje
             ? {
                 id: ultimoMensaje.id,
@@ -92,6 +92,9 @@ router.get("/:emisorId/:receptorId", verificarToken, async (req, res) => {
       take: Number(limit),
       include: {
         emisor: {
+          select: { id: true, nombre: true, apellido: true, avatar: true },
+        },
+        receptor: {
           select: { id: true, nombre: true, apellido: true, avatar: true },
         },
       },
