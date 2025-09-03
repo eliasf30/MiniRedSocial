@@ -1,13 +1,21 @@
-import { Resend } from "resend";
-
-const resend = new Resend(process.env.RESEND_API_KEY);
+import nodemailer from "nodemailer";
 
 export const enviarCorreoVerificacion = async (email, token) => {
   const url = `${process.env.FRONTEND_URL}/verificar-correo/${token}`;
 
+  console.log("Intentando enviar correo de verificación a:", email);
+
   try {
-    await resend.emails.send({
-      from: "onboarding@resend.dev", // funciona sin dominio propio
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.MAIL_USER,
+        pass: process.env.MAIL_PASS, // contraseña de aplicación
+      },
+    });
+
+    const mailOptions = {
+      from: `"MiRedSocial" <${process.env.MAIL_USER}>`,
       to: email,
       subject: "Verifica tu correo",
       html: `
@@ -15,11 +23,12 @@ export const enviarCorreoVerificacion = async (email, token) => {
         <p>Haz click en el siguiente enlace para verificar tu cuenta:</p>
         <a href="${url}">${url}</a>
       `,
-    });
+    };
 
-    console.log(`Correo enviado a ${email}`);
+    const info = await transporter.sendMail(mailOptions);
+    console.log("Correo enviado:", info.messageId);
   } catch (error) {
-    console.error("Error enviando correo:", error);
+    console.error("Error enviando correo con Nodemailer:", error);
     throw error;
   }
 };
