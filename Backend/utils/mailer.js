@@ -10,6 +10,8 @@ export const enviarCorreoVerificacion = async (email, token) => {
       auth: {
         user: process.env.MAIL_USER,
         pass: process.env.MAIL_PASS, // contraseña de aplicación sin espacios
+        logger: true,   // loguea info del envío
+        debug: true,
       },
     });
 
