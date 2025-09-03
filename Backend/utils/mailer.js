@@ -2,7 +2,6 @@ import nodemailer from "nodemailer";
 
 export const enviarCorreoVerificacion = async (email, token) => {
   const url = `${process.env.FRONTEND_URL}/verificar-correo/${token}`;
-
   console.log("Intentando enviar correo de verificación a:", email);
 
   try {
@@ -10,7 +9,7 @@ export const enviarCorreoVerificacion = async (email, token) => {
       service: "gmail",
       auth: {
         user: process.env.MAIL_USER,
-        pass: process.env.MAIL_PASS, // contraseña de aplicación
+        pass: process.env.MAIL_PASS, // contraseña de aplicación sin espacios
       },
     });
 
