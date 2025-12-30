@@ -1,4 +1,4 @@
-import { useAuth } from "../../context/useAuth";
+import { useAuth } from "../../context/useAuth.js"
 import preview from "../../images/preview.png";
 import { useEffect, useState, useRef } from "react";
 import { obtenerListaChats } from "../../services/chatServices";

@@ -8,7 +8,7 @@ function Descripcion() {
       <p>
         Proyecto Fullstack donde los usuarios pueden registrarse, crear
         publicaciones con texto e imágenes, agregar amigos y chatear en tiempo
-        real. Diseñado pensando en experiencia de usuario, rendimiento y
+        real.   Diseñado pensando en experiencia de usuario, rendimiento y
         escalabilidad.
       </p>
 

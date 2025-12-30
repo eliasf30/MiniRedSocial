@@ -36,12 +36,8 @@ const reenviarEmail = async(email) =>{
 
 const loginUsuario = async(data) =>{
     try {
-
-        
         const response = await axios.post(`${URL}/login`, data)
          
-        
-       
         return response.data;
     } catch (error) {
         console.error("Error en loginUsuario:", error);

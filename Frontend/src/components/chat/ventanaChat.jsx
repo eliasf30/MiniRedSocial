@@ -4,7 +4,7 @@ import preview from "../../images/preview.png";
 import { useNavigate } from "react-router";
 import Picker from "@emoji-mart/react";
 import data from "@emoji-mart/data";
-import { useAuth } from "../../context/useAuth";
+import { useAuth } from "../../context/useAuth.js"
 import { cargarMensajesHistoricos } from "../../services/chatServices";
 import { subirImagen } from "../../services/chatServices";
 import { toast } from "react-toastify";

@@ -126,7 +126,7 @@ avatarUrl = result.secure_url;
       },
     });
 
-    const botId = 2;
+    const botId = 1;
     await prisma.solicitudAmistad.create({
       data: {
         emisorId: botId,

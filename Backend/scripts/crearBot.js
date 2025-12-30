@@ -18,7 +18,7 @@ const crearBot = async () => {
 
     const nuevoBot = await prisma.usuario.create({
       data: {
-        id: 2,
+        id: 1,
         nombre: "Bot",
         apellido: "de Prueba",
         email: "bot@test.com",
