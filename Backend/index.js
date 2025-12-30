@@ -29,21 +29,47 @@ const app = express();
 
 const server = http.createServer(app);
 
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://mini-red-social-ten.vercel.app",
+  "https://mini-red-social-r9jgc1j1w-elias-nahuel-figueroa-pradas-projects.vercel.app"
+];
+
 const io = new Server(server, {
   cors: {
-     origin: process.env.FRONTEND_URL,
-    methods: ["GET", "POST", "PUT", "DELETE"],
+    origin: (origin, callback) => {
+      if (
+        !origin ||
+        origin === "http://localhost:5173" ||
+        origin.endsWith(".vercel.app")
+      ) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true
-  },
+  }
 });
-
 app.locals.io = io;
 
+
+
 app.use(cors({
-  origin: process.env.FRONTEND_URL,
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true);
+
+    if (
+      origin === "http://localhost:5173" ||
+      origin.endsWith(".vercel.app")
+    ) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
   credentials: true
 }));
-
 app.use(express.json());
 app.use("/api/usuarios", usuariosRoutes);
 app.use("/api/amigos", amigosRoutes);
