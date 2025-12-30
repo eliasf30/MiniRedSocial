@@ -308,8 +308,26 @@ router.post("/login", async (req, res) => {
 
 router.get("/", async (req, res) => {
   try {
-    const usuarios = await prisma.usuario.findMany();
-    res.json(usuarios);
+    const usuarios = await prisma.usuario.findMany({
+  select: {
+    id: true,
+    nombre: true,
+    apellido: true,
+    email: true,
+    descripcion: true,
+    avatar: true,
+    createdAt: true,
+    EmailVisible: true,
+    PerfilPrivado: true,
+  },
+});
+
+const usuariosSeguros = usuarios.map(u => ({
+  ...u,
+  email: u.EmailVisible ? u.email : null,
+}));
+
+res.json(usuariosSeguros);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "error al consultar usuarios" });
