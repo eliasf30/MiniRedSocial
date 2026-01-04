@@ -9,7 +9,7 @@ export const enviarCorreoVerificacion = async (email, token) => {
 
   try {
     const emailResponse = await resend.emails.send({
-      from: "onboarding@resend.dev", 
+      from: "noreply@miniredsocial.org", 
       to: email,
       subject: "Verifica tu correo",
       html: `

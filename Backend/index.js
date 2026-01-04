@@ -29,11 +29,6 @@ const app = express();
 
 const server = http.createServer(app);
 
-const allowedOrigins = [
-  "http://localhost:5173",
-  "https://mini-red-social-ten.vercel.app",
-  "https://mini-red-social-r9jgc1j1w-elias-nahuel-figueroa-pradas-projects.vercel.app"
-];
 
 const io = new Server(server, {
   cors: {
@@ -41,7 +36,8 @@ const io = new Server(server, {
       if (
         !origin ||
         origin === "http://localhost:5173" ||
-        origin.endsWith(".vercel.app")
+        origin.endsWith(".vercel.app") ||
+        origin === "https://www.miniredsocial.org" || origin.endsWith(".miniredsocial.org")
       ) {
         callback(null, true);
       } else {
@@ -61,7 +57,8 @@ app.use(cors({
 
     if (
       origin === "http://localhost:5173" ||
-      origin.endsWith(".vercel.app")
+      origin.endsWith(".vercel.app") ||
+      origin === "https://www.miniredsocial.org" || origin.endsWith(".miniredsocial.org")
     ) {
       callback(null, true);
     } else {
