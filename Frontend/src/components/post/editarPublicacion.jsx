@@ -86,7 +86,7 @@ function EditarPublicacion({ onModificar }) {
 
   const onSubmit = async (data) => {
     const archivoImagen = imagenUrlWatch?.[0];
-    console.log(archivoImagen);
+    
     if (!contenido && (!imagen || !archivoImagen)) {
       toast.error("Debes agregar texto o una imagen");
       return;

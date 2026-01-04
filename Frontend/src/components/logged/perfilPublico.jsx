@@ -78,7 +78,7 @@ function PerfilPublico() {
       hoy.getMonth() === nacimiento.getMonth();
   }
 
-  console.log();
+  
   return (
     <div className="container my-4 align-items-center ">
       <div className="card shadow-lg  p-4 profilewidth">

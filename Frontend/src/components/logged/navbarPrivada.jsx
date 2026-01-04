@@ -68,7 +68,7 @@ function NavbarPrivada() {
     `,
     }),
   };
-  console.log(usuario)
+ 
   return (
     <>
       <nav

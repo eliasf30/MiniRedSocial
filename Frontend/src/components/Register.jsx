@@ -45,7 +45,7 @@ function Register() {
     }
 
     const captchaToken = await executeRecaptcha("registro");
-     console.log("Token generado en frontend:", captchaToken);
+     
     setLoading(true);
     setErrorMsg("");
     try {
