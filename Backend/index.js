@@ -21,6 +21,12 @@ const __dirname = path.dirname(__filename);
 
 dotenv.config();
 
+
+if (process.env.NODE_ENV === "production") {
+  console.log = () => {};
+  console.warn = () => {};
+
+
 console.log("PORT:", process.env.PORT || "No definido");
 console.log("DATABASE_URL:", process.env.DATABASE_URL ? "OK" : "No definido");
 console.log("JWT_SECRET:", process.env.JWT_SECRET ? "OK" : "No definido");
