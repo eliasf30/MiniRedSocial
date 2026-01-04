@@ -22,10 +22,6 @@ const __dirname = path.dirname(__filename);
 dotenv.config();
 
 
-if (process.env.NODE_ENV === "production") {
-  console.log = () => {};
-  console.warn = () => {};
-
 
 console.log("PORT:", process.env.PORT || "No definido");
 console.log("DATABASE_URL:", process.env.DATABASE_URL ? "OK" : "No definido");
@@ -141,6 +137,22 @@ io.on("connection", (socket) => {
 const PORT = process.env.PORT || 5000;
 
 
+
+const isProd = process.env.NODE_ENV === "production";
+
+function log(...args) {
+  if (!isProd) console.log(...args);
+}
+
+function warn(...args) {
+  if (!isProd) console.warn(...args);
+}
+
+log("PORT:", process.env.PORT || "No definido");
+log("DATABASE_URL:", process.env.DATABASE_URL ? "OK" : "No definido");
+log("JWT_SECRET:", process.env.JWT_SECRET ? "OK" : "No definido");
+
+
 server.listen(PORT, "0.0.0.0", () => {
-  console.log(`servidor corriendo en el puerto ${PORT}`);
+  log(`servidor corriendo en el puerto ${PORT}`);
 });
