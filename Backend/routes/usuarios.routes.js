@@ -52,7 +52,7 @@ router.post("/register", upload.single("avatar"), async (req, res) => {
     return res.status(400).json({ error: "Captcha faltante" });
   }
 
- let avatarUrl = "/avatars/default-avatar.jpg"; // por defecto
+ let avatarUrl = null;
 
 if (req.file) {
   try {
