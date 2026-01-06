@@ -1,4 +1,4 @@
-import { useAuth } from "../../context/useAuth.js"
+import { useAuth } from "../../context/useAuth.js";
 import preview from "../../images/preview.png";
 import { useEffect, useState, useRef } from "react";
 import { obtenerListaChats } from "../../services/chatServices";
@@ -100,20 +100,28 @@ function Chat() {
   }, [usuario, chatActivo]);
 
   // Cargar lista de chats al montar
-  useEffect(() => {
-    const cargarChats = async () => {
-      try {
-        const res = await obtenerListaChats();
-        setChats(res);
-      } catch (error) {
-        console.error(error);
-        toast.error("Error al obtener el chat: " + error.message);
-      } finally {
-        setLoading(false);
-      }
-    };
+ useEffect(() => {
+  let interval;
+
+  const cargarChats = async () => {
+    try {
+      const res = await obtenerListaChats();
+      setChats(res);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  cargarChats(); // carga inicial
+
+  interval = setInterval(() => {
     cargarChats();
-  }, []);
+  }, 5000); // 👈 cada 5 segundos
+
+  return () => clearInterval(interval);
+}, []);
 
   // Cargar mensajes históricos al cambiar chat activo
   useEffect(() => {
@@ -230,7 +238,7 @@ function Chat() {
                   className={chatActivo?.id === chat.id ? "chat-activo" : ""}
                   style={{
                     display: "flex",
-                    position:"relative",
+                    position: "relative",
                     flexDirection: "row",
                     alignItems: "center",
                     gap: "10px",
@@ -245,14 +253,18 @@ function Chat() {
                   }}
                 >
                   <img
-                    src={chat.avatar ? `${chat.avatar}` : preview}
+                    src={chat.avatar || preview}
                     alt={chat.nombre}
+                    
                     width={55}
                     height={55}
+                    onError={(e) => {
+                      e.currentTarget.src = preview;
+                    }}
                     style={{ borderRadius: "50%", objectFit: "cover" }}
                     className="ms-3"
                   />
-                  <div style={{ display: "flex", flexDirection: "column", }}>
+                  <div style={{ display: "flex", flexDirection: "column" }}>
                     <strong
                       style={{ fontSize: "16px", color: darkMode && "#f0f0f0" }}
                     >
@@ -291,9 +303,9 @@ function Chat() {
                       style={{
                         fontSize: "12px",
                         color: darkMode ? "#888" : "#999",
-                        position:"absolute",
+                        position: "absolute",
                         right: "10px",
-                        bottom:"15px"
+                        bottom: "15px",
                       }}
                     >
                       {chat.ultimoMensaje?.createdAt

@@ -4,7 +4,7 @@ import preview from "../../images/preview.png";
 import { useNavigate } from "react-router";
 import Picker from "@emoji-mart/react";
 import data from "@emoji-mart/data";
-import { useAuth } from "../../context/useAuth.js"
+import { useAuth } from "../../context/useAuth.js";
 import { cargarMensajesHistoricos } from "../../services/chatServices";
 import { subirImagen } from "../../services/chatServices";
 import { toast } from "react-toastify";
@@ -251,10 +251,13 @@ function VentanaChat({
           style={{ flexShrink: 0, cursor: "pointer" }}
         >
           <img
-            src={chat.avatar ? `${chat.avatar}` : preview}
+            src={chat.avatar || preview}
             alt={chat.nombre}
             width={40}
             height={40}
+            onError={(e) => {
+              e.currentTarget.src = preview;
+            }}
             style={{ borderRadius: "50%", objectFit: "cover", marginRight: 10 }}
             draggable="false"
           />
