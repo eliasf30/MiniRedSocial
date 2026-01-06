@@ -90,7 +90,7 @@ function PerfilPublico() {
         <div className="row align-items-center mb-3 position-relative">
           <div className="col-12 col-md-auto text-center mb-3 mb-md-0">
             <img
-              src={`${user.avatar}`}
+              src={user.avatar? `${user.avatar}`: preview}
               alt="Avatar"
               className="rounded-circle"
               style={{ width: "120px", height: "120px", objectFit: "cover" }}
